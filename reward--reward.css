@@ -1,0 +1,215 @@
+@font-face {
+  font-family: "FN Reward";
+  src: url("reward--archivo-black.ttf") format("truetype");
+  font-weight: 900;
+  font-display: swap;
+}
+
+dialog.fn-reward {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  overflow: hidden;
+  color: #fff;
+  font: 500 16px/1.22 Arial, sans-serif;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: inherit;
+}
+.fn-reward[open] { display: grid; place-items: center; }
+.fn-reward::backdrop { background: transparent; }
+.fn-reward [hidden] { display: none !important; }
+.fn-reward * { box-sizing: border-box; }
+.fn-reward button {
+  border: 0;
+  touch-action: manipulation;
+  cursor: inherit;
+  padding: 0;
+  margin: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.fn-reward button:focus-visible { outline: 3px solid white; outline-offset: 2px; }
+.fn-reward button:active { filter: brightness(.87); }
+.fn-processing {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: #06173136;
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+.fn-processing i {
+  width: 27px;
+  height: 27px;
+  border: 3px solid #e0edf750;
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: fn-spin .55s linear infinite;
+}
+@keyframes fn-spin { to { transform: rotate(360deg); } }
+.fn-stage {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: #073c76 url("reward--reward-background.webp") center/100% 100% no-repeat;
+  container-type: inline-size;
+}
+.fn-stage h2, .fn-stage p { margin: 0; }
+.fn-stage h2 {
+  font: italic 900 clamp(16px, 2.05cqw, 52px)/1.04 "FN Reward","Arial Black",sans-serif;
+  text-transform: uppercase;
+  letter-spacing: -.045em;
+}
+.fn-stage p { color: #e2edfb; font-size: clamp(10px, 1.14cqw, 27px); margin-top: .42em; }
+.fn-plate { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; z-index: -1; opacity: 0; }
+.fn-native .fn-plate { opacity: 1; }
+.fn-heading { position: absolute; left: 3.3%; top: 18.5%; width: 31%; }
+.fn-native .fn-heading { visibility: hidden; }
+.fn-info { position: absolute; top: 18.6%; left: 67.25%; width: 30%; }
+.fn-type {
+  display: block;
+  margin-bottom: .32em;
+  font: italic 900 clamp(10px, 1.03cqw, 25px)/1.1 "FN Reward","Arial Black",sans-serif;
+  color: #b8cce5;
+  text-transform: uppercase;
+}
+.fn-figure {
+  position: absolute;
+  left: 34.5%;
+  top: 19%;
+  width: 31%;
+  height: 53.5%;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+.fn-figure > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  object-fit: contain;
+  -webkit-user-drag: none;
+}
+.fn-figure.fn-card-art > img {
+  max-width: 82%;
+  max-height: 81%;
+  border-radius: 6%;
+  object-fit: contain;
+}
+.fn-enter .fn-figure {
+  animation: fn-materialize .76s ease-out both;
+}
+@keyframes fn-materialize {
+  0%,18% { opacity: 0; transform: translateY(3%) scale(.96); filter: brightness(4) sepia(1) saturate(8) hue-rotate(131deg); }
+  42% { opacity: 1; filter: brightness(3) sepia(1) saturate(6) hue-rotate(135deg) drop-shadow(0 0 13px #6ff5ff); }
+  69% { filter: brightness(1.45) saturate(1.12); }
+  100% { transform: none; filter: none; opacity: 1; }
+}
+.fn-flash {
+  position: absolute;
+  left: 32.3%;
+  top: 9.9%;
+  width: 36%;
+  height: 66.2%;
+  pointer-events: none;
+  opacity: 0;
+  background: url("reward--reveal-light.webp") no-repeat 0 0/2500% 100%;
+}
+.fn-enter .fn-flash { animation: fn-light .82s steps(24,end) both; }
+@keyframes fn-light {
+  0% { background-position: 0 0; opacity: 0; }
+  7%,95% { opacity: 1; }
+  100% { background-position: 100% 0; opacity: 0; }
+}
+.fn-enter .fn-info { animation: fn-info-in .48s ease-out both; }
+@keyframes fn-info-in { from { opacity: 0; } to { opacity: 1; } }
+.fn-strip {
+  position: absolute;
+  top: 74%;
+  left: 19%;
+  width: 62%;
+  height: 12%;
+  display: flex;
+  align-items: center;
+  justify-content: safe center;
+  gap: .65cqw;
+  overflow-x: auto;
+  scrollbar-width: none;
+  overscroll-behavior-inline: contain;
+}
+.fn-strip::-webkit-scrollbar { display: none; }
+.fn-strip button {
+  height: 87%;
+  flex-shrink: 0;
+  aspect-ratio: .84;
+  border-radius: 12%;
+  border: 2px solid #7891ba;
+  overflow: hidden;
+  background: linear-gradient(140deg,#74513e,#a44e27);
+}
+.fn-strip button[aria-pressed="true"] {
+  border-color: #f1fcff;
+  box-shadow: 0 0 0 2px #9bdfff;
+}
+.fn-strip img { width: 100%; height: 100%; display: block; object-fit: cover; }
+.fn-actions {
+  position: absolute;
+  left: 3.25%;
+  bottom: 6.05%;
+  height: 5.55%;
+  width: 20.15%;
+  display: grid;
+  grid-template-columns: 39% 54.5%;
+  gap: 6.5%;
+}
+.fn-actions button {
+  color: #111a36;
+  background: #aec9ff;
+  border-radius: 1.05cqw;
+  text-transform: uppercase;
+  white-space: nowrap;
+  font: 900 clamp(10px, 1.45cqw, 29px)/1.05 "FN Reward","Arial Black",sans-serif;
+  letter-spacing: -.04em;
+}
+.fn-native .fn-actions button { color: transparent; background: transparent; }
+.fn-actions button:disabled { pointer-events: none; opacity: .55; }
+@media (orientation: portrait) {
+  .fn-stage { background-size: auto 100%; }
+  .fn-stage .fn-plate { visibility: hidden; }
+  .fn-native .fn-heading { visibility: visible; }
+  .fn-heading { left: 5%; top: 6%; width: 90%; }
+  .fn-stage h2 { font-size: clamp(20px, 4.8cqw, 46px); }
+  .fn-stage p { font-size: clamp(13px, 2.6cqw, 25px); }
+  .fn-type { font-size: clamp(11px, 2.35cqw, 21px); }
+  .fn-figure { left: 11%; top: 15.5%; width: 78%; height: 44%; }
+  .fn-flash { left: 9%; top: 14%; width: 82%; height: 46%; }
+  .fn-info { left: 5%; top: 61%; width: 90%; text-align: center; }
+  .fn-strip { left: 3%; top: 76%; width: 94%; height: 10%; gap: 1.5cqw; }
+  .fn-actions { width: 62%; left: 19%; bottom: max(4%, env(safe-area-inset-bottom)); height: 5.7%; }
+  .fn-actions button, .fn-native .fn-actions button {
+    color: #111a36;
+    background: #aec9ff;
+    font-size: clamp(13px, 2.9cqw, 27px);
+    border-radius: 2cqw;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fn-enter .fn-figure, .fn-enter .fn-info, .fn-enter .fn-flash { animation: none; }
+}

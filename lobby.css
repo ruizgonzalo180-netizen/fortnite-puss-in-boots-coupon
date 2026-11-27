@@ -1,0 +1,78 @@
+.fn-lobby {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  container-type: size;
+  background: #101124;
+  isolation: isolate;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.fn-lobby[hidden], .fn-lobby [hidden] { display: none !important; }
+.fn-lobby .scene-art, .fn-lobby .scene-video, .fn-lobby .lobby-input,
+.fn-lobby .lobby-costume, .fn-lobby .lobby-status {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: fill;
+}
+.fn-lobby .scene-art, .fn-lobby .scene-video, .fn-lobby .lobby-costume,
+.fn-lobby .lobby-status { pointer-events: none; }
+.fn-lobby .scene-video::-webkit-media-controls { display: none !important; }
+.fn-lobby .lobby-input { pointer-events: none; }
+.fn-lobby .lobby-hit {
+  cursor: inherit;
+  position: absolute;
+  display: block;
+  pointer-events: auto;
+  border: none;
+  border-radius: 0.55cqw;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+  touch-action: manipulation;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.fn-lobby .lobby-hit:focus-visible { outline: 0.2cqw solid white; outline-offset: -0.2cqw; }
+.fn-lobby .lobby-hit:active { background: #ffffff18; }
+.fn-lobby .lobby-clock {
+  position: absolute;
+  left: 1.43%; top: 1.02%;
+  font: 600 1.18cqw/1.15 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  letter-spacing: -.045cqw;
+  color: #fff;
+}
+.fn-lobby .lobby-status img {
+  position: absolute; left: 93.2%; top: .6%; width: 5.9%; height: 3%;
+}
+.fn-lobby .platform-patch, .fn-lobby .lobby-wolf, .fn-lobby .lobby-cat {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+}
+.fn-lobby .platform-patch { left: 37.3016%; top: 23.7903%; width: 20.4586%; height: 63.3065%; }
+.fn-lobby .lobby-wolf { left: 38.0071%; top: 20.1613%; width: 24.6032%; height: 67.3387%; }
+.fn-lobby .lobby-cat { left: 55.0265%; top: 55.7796%; width: 10.3175%; height: 26.2097%; }
+.fn-lobby .lobby-vbucks {
+  position: absolute;
+  top: 2.25%; left: 56.65%;
+  font: 850 1.18cqw/1.4 Arial, sans-serif; color: white;
+  background: linear-gradient(100deg, #0b1538, #0d193a);
+  min-width: 3.9%;
+  pointer-events: none;
+}
+.fn-lobby .emote-overlay {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  background: rgba(10,12,21,.58);
+  pointer-events: none;
+}
+.fn-lobby .emote-overlay img { display: block; width: 100%; height: 100%; }
+.fn-lobby .emote-title {
+  position: absolute; left: 35%; top: 29.6%; width: 30%;
+  text-align: center; color: #fff; font: 700 1.05cqw/1.2 Arial,sans-serif;
+}
