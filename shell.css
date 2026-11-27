@@ -38,3 +38,12 @@ html.ipad-installed #stage {
   position: fixed;
   inset: 0;
 }
+
+#puss-catalog .pc-card .pc-price.owned,
+.dd-screen .dd-price.owned,
+.fn-locker .lk-state[data-owned="true"],
+.fn-locker .lk-count { color: #ffdf24; }
+.fn-locker .lk-card[data-status="owned"] .lk-card-status {
+  background: #ffdf24;
+  color: #302400;
+}

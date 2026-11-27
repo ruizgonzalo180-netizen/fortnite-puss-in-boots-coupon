@@ -52,7 +52,7 @@
     movie.controls = false;
     movie.playsInline = true;
     movie.addEventListener('timeupdate', () => {
-      if (scene === 'launch' && movie.currentTime >= 11.1 && !launchNav) {
+      if (scene === 'launch' && movie.currentTime >= 3.23 && !launchNav) {
         launchNav = true;
         discoverButtons();
       }
@@ -235,18 +235,18 @@
   }
 
   function launch() {
-    reset('launch','home.webp');
+    reset('launch','epic.webp');
     launchNav = false;
-    video('launch.mp4', false, () => lobby(true), () => {
+    video('launch-fast.mp4', false, () => lobby(true), () => {
       // Preserve the entry and its navigation when the browser lacks an H.264 decoder.
       const entryId = ++currentPlayback;
       const at = (delay,fn) => setTimeout(() => {
         if (entryId === currentPlayback && !root.hidden) fn();
       },delay);
       art.src = media('epic.webp');
-      at(900,() => { art.src = media('loading.webp'); });
-      at(3200,() => { art.src = media('discover.webp'); launchNav = true; discoverButtons(); });
-      at(7200,() => lobby(true));
+      at(650,() => { art.src = media('loading.webp'); });
+      at(1800,() => { art.src = media('discover.webp'); launchNav = true; discoverButtons(); });
+      at(4000,() => lobby(true));
     });
   }
 

@@ -302,7 +302,7 @@
       if (opts.bundle && !gotAll && !discount && price === bundle.price) priceRow.classList.add('dd-portrait-prices');
       const caption = gotAll ? (opts.bundle ? 'Bundle in your locker' : 'In your locker') : discount ? 'Black Friday Coupon applied' : (available.length > 1 ? 'The price for included items is:' : 'Item price');
       priceRow.append(el('div','dd-price-caption',caption));
-      const amount = el('div','dd-price');
+      const amount = el('div',gotAll ? 'dd-price owned' : 'dd-price');
       if (gotAll) amount.textContent = 'OWNED';
       else {
         const coin = el('span','dd-coin','V');
@@ -320,16 +320,13 @@
   }
 
   function addExtras() {
-    const likesKey = 'puss-shop-favorites';
-    let favorites = [];
-    try { const saved = JSON.parse(localStorage.getItem(likesKey) || '[]'); if (Array.isArray(saved)) favorites = saved; } catch {}
-    let liked = favorites.includes(current.id);
+    let liked = window.ShopState.favorites.includes(current.id);
     const like = action('Like ' + current.name,'dd-hit dd-like', () => {
       liked = !liked;
       like.setAttribute('aria-pressed',String(liked));
-      favorites = favorites.filter(id => id !== current.id);
+      const favorites = window.ShopState.favorites.filter(id => id !== current.id);
       if (liked) favorites.push(current.id);
-      try { localStorage.setItem(likesKey,JSON.stringify(favorites)); } catch {}
+      window.ShopState.favorites = favorites;
     });
     like.setAttribute('aria-pressed',String(liked));
     screen.append(like, action('Gift','dd-hit dd-gift',() => panel('GIFT', 'There are no eligible friends in this local shop.')));

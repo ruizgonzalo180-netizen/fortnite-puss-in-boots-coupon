@@ -119,23 +119,16 @@
     rememberedScroll = 0;
     options.onBack?.();
   }
-  function readStorage(key, fallback) {
-    try {return JSON.parse(localStorage.getItem(key) || 'null') ?? fallback;}
-    catch {return fallback;}
-  }
-  function writeStorage(key,value) {
-    try {localStorage.setItem(key, JSON.stringify(value));} catch {}
-  }
   function supportCreator() {
     dialog('Support a Creator', box => {
       const input = node('input');
       input.setAttribute('aria-label','Creator code');
       input.placeholder = 'Enter a creator code';
       input.maxLength = 16;
-      input.value = readStorage('puss-shop-creator','');
+      input.value = window.ShopState.creator;
       const save = button('Accept',() => {
         const code = input.value.trim().replace(/[^a-z0-9_-]/gi,'');
-        writeStorage('puss-shop-creator',code);
+        window.ShopState.creator = code;
         dismiss();
         updateCreator();
       });
@@ -147,7 +140,7 @@
     const first = root.querySelector('.pc-footer');
     if (!first) return;
     first.querySelector('.pc-creator')?.remove();
-    const code = readStorage('puss-shop-creator','');
+    const code = window.ShopState.creator;
     if(code) {
       const label = node('span','pc-creator','SUPPORT-A-CREATOR: '+code.toUpperCase());
       Object.assign(label.style,{position:'absolute',inset:'9% 3%',display:'grid',placeItems:'center',background:'#4065a2',borderRadius:'.5cqw',color:'#071c38',fontWeight:'900',fontSize:'1.14cqw'});
@@ -168,7 +161,7 @@
     }
     navButton('Search',[48,0,116,117],() => itemList('Search',cards,true));
     navButton('Favorites',[166,0,112,117],() => {
-      const saved = readStorage('puss-shop-favorites',[]);
+      const saved = window.ShopState.favorites;
       itemList('Favorites',cards.filter(c => saved.includes(c.id)),false);
     });
     navButton('Play — return to lobby',[277,0,115,120],goBack);
@@ -225,7 +218,7 @@
       b.append(img);
       if(isBundle) bundleImage = img;
       const applicable = isBundle && options.discountActive;
-      if(owned || applicable) b.append(node('span','pc-price'+(owned?'':' coupon'),owned?'✓ OWNED':'0  •  COUPON APPLIED'));
+      if(owned || applicable) b.append(node('span','pc-price'+(owned?' owned':' coupon'),owned?'OWNED':'0  •  COUPON APPLIED'));
       rows.append(b);
     }
     shelf.append(rows);
