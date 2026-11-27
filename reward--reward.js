@@ -14,6 +14,7 @@
   };
   let imageSequence = 0;
   const animationBytes = new Map();
+  const mountedPreviews = new WeakMap();
 
   function freshAnimationURL(url, sequence) {
     if (location.protocol === "file:") return Promise.resolve(url + "?play=" + sequence);
@@ -49,6 +50,7 @@
 
   function preview(container, id, firstPhase = "intro", onPaint, onFailure) {
     if (!container || !figureIds.has(id)) return null;
+    mountedPreviews.get(container)?.();
     let phase = firstPhase;
     let mounted;
     let pending;
@@ -61,7 +63,9 @@
     });
     resize.observe(container);
     function remove() {
+      if (!alive) return;
       alive = false;
+      mountedPreviews.delete(container);
       clearTimeout(timer);
       resize.disconnect();
       discardPreviewImage(pending);
@@ -98,6 +102,7 @@
         else if (src.startsWith("blob:")) URL.revokeObjectURL(src);
       }).catch(() => { if (alive && image === pending) image.src = url + "?play=" + sequence; });
     }
+    mountedPreviews.set(container, remove);
     load(firstPhase);
     return remove;
   }
@@ -150,6 +155,7 @@
   let painter;
   let pendingFrame;
   let expectedVideo = "";
+  let mediaGeneration = 0;
   let removeImagePreview;
   let revealTimer;
   let paintedPhase;
@@ -222,6 +228,7 @@
   }
 
   function stopMotion(keepFrame = false) {
+    mediaGeneration++;
     expectedVideo = "";
     clearTimeout(revealTimer);
     if (!keepFrame) {
@@ -249,12 +256,14 @@
     stopMotion(folder === "motion");
     if (!figureIds.has(item.id)) return;
     if (folder === "intro") figure.classList.add("fn-waiting");
+    const generation = mediaGeneration;
+    const current = () => active && request === playbackId && generation === mediaGeneration;
     expectedVideo = resource(folder + "/" + item.id + ".mp4");
     movie.loop = folder === "motion";
     let lastTime = -1;
     let imageFallback = false;
     function useAnimatedImage() {
-      if (request !== playbackId || !active || imageFallback) return;
+      if (!current() || imageFallback) return;
       imageFallback = true;
       stopMotion(true);
       removeImagePreview = preview(figure, item.id, folder, phase => {
@@ -265,8 +274,8 @@
       }, () => figure.classList.remove("fn-moving", "fn-image-mode", "fn-waiting"));
     }
     function draw() {
+      if (!current() || movie.currentSrc !== expectedVideo) return;
       pendingFrame = undefined;
-      if (!active || request !== playbackId || movie.currentSrc !== expectedVideo) return;
       if (movie.readyState >= 2 && movie.videoHeight > 0 && lastTime !== movie.currentTime) {
         const height = movie.videoHeight / 2;
         if (canvas.width !== movie.videoWidth || canvas.height !== height) {
@@ -293,9 +302,9 @@
       pendingFrame = movie.requestVideoFrameCallback ? movie.requestVideoFrameCallback(draw) : requestAnimationFrame(draw);
     }
     movie.onerror = useAnimatedImage;
-    movie.onplaying = () => { if (pendingFrame === undefined) draw(); };
+    movie.onplaying = () => { if (current() && pendingFrame === undefined) draw(); };
     movie.onended = () => {
-      if (folder === "intro" && active && request === playbackId) playMotion(item, request, "motion");
+      if (folder === "intro" && current()) playMotion(item, request, "motion");
     };
     movie.muted = true;
     movie.src = expectedVideo;
