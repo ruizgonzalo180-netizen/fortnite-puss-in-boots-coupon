@@ -229,9 +229,6 @@
   font: 900 1.48cqw/1.08 var(--lk-heavy);
   letter-spacing: -.035em;
 }
-@media (orientation: landscape) {
-  html.ipad-protected-top .lk-header { top: max(4.5%, var(--ipad-hud-clearance, 44px)); }
-}
 @media (orientation: portrait) {
   .lk-header { top: max(2%, env(safe-area-inset-top)); left: 4%; gap: 2.5cqw; }
   .fn-locker .lk-back { width: max(44px, 6cqw); height: max(44px, 6cqw); font-size: 4.5cqw; }

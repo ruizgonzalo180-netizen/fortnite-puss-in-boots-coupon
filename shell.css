@@ -1,16 +1,15 @@
 :root {
   color-scheme: dark;
-  background: var(--game-floor, #06182d);
-  --ipad-native-top: env(safe-area-inset-top, 0px);
+  background: #06182d;
 }
 * { box-sizing: border-box; }
 html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; overscroll-behavior: none; }
 body {
-  position: fixed;
+  position: absolute;
   inset: 0;
   width: auto;
   height: auto;
-  background: var(--game-floor, #06182d);
+  background: #06182d;
   color: white;
   font-family: Arial, sans-serif;
   -webkit-tap-highlight-color: transparent;
@@ -21,9 +20,6 @@ body {
   isolation: isolate;
   overflow: hidden;
   container-type: size;
-}
-html.ipad-protected-top {
-  --ipad-hud-clearance: max(44px, calc(env(safe-area-inset-top, 0px) + 12px));
 }
 html dialog.fn-reward { width: auto; height: auto; }
 @media (pointer:fine) {

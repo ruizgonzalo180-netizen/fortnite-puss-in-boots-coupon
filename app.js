@@ -64,7 +64,6 @@
   function openCatalog() {
     clearScreens();
     screen = "catalog";
-    window.ShopIPadDisplay?.setScene(screen);
     product = null;
     ShopCatalog.open({
       owned:state.owned, balance:state.balance, discountActive:state.coupon === "active",
@@ -76,7 +75,6 @@
   function openDetail(id = "puss", bundle = false) {
     clearScreens();
     screen = "detail";
-    window.ShopIPadDisplay?.setScene(screen);
     product = {id, bundle};
     ShopDetail.open({
       itemId:id, bundle, owned:state.owned, equipped:state.equipped, balance:state.balance,
@@ -93,7 +91,6 @@
     const returnTo = screen === "lobby" ? openLobby : openCatalog;
     clearScreens();
     screen = "locker";
-    window.ShopIPadDisplay?.setScene(screen);
     ShopLocker.open({
       items, owned:state.owned, equipped:state.equipped, onBack:returnTo,
       onEquip:id => equip(id, true), onShop:id => openDetail(id || "puss", !id)
@@ -127,7 +124,6 @@
       if (items.every(item => state.owned.includes(item.id))) state.coupon = "redeemed";
       save();
       screen = "reward";
-      window.ShopIPadDisplay?.setScene(screen);
       ShopCoupon.hide();
       document.querySelectorAll("#stage video, #stage audio").forEach(media => media.pause());
       showReward(newIds.map(id => byId.get(id)), () => {

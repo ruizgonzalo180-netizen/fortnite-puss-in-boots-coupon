@@ -145,33 +145,6 @@
   #puss-catalog .pc-shade { animation:none; opacity:.2; }
   #puss-catalog .pc-card { transition:none; }
 }
-@media (orientation: landscape) {
-  /* Keep the original artwork and its touch targets in the same coordinate
-     space below a system status bar. The outer stage clips the lower edge. */
-  html.ipad-protected-top #puss-catalog {
-    top:var(--ipad-hud-clearance,0px);
-    bottom:auto;
-    height:100%;
-    overflow:visible;
-  }
-  html.ipad-protected-top #puss-catalog::before {
-    content:"";
-    position:absolute;
-    inset:auto 0 100%;
-    height:var(--ipad-hud-clearance,0px);
-    pointer-events:none;
-    /* Colors sampled across the upper edge of the original shop artwork. */
-    background:linear-gradient(90deg,#04092c 0%,#041035 15%,#031745 30%,#021c4c 40%,#012c64 50%,#004b8a 60%,#016bb5 70%,#0071b8 80%,#0066ac 90%,#005392 100%);
-  }
-  html.ipad-protected-top #puss-catalog .pc-shelf {
-    bottom:var(--ipad-hud-clearance,0px);
-  }
-  html.ipad-protected-top #puss-catalog .pc-footer,
-  html.ipad-protected-top #puss-catalog .pc-bar-wash,
-  html.ipad-protected-top #puss-catalog .pc-panel-cover {
-    translate:0 calc(0px - var(--ipad-hud-clearance,0px));
-  }
-}
 @media (orientation: portrait) {
   #puss-catalog {
     --pc-gap: clamp(6px,1.1cqw,12px);

@@ -1,8 +1,7 @@
 (() => {
   'use strict';
   const media = name => 'lobby-media--' + name;
-  let root, art, movie, inputs, costume, status, balance, sky, skyContext;
-  let skyCallback = 0;
+  let root, art, movie, inputs, costume, status, balance;
   let enterShop, enterLocker;
   let scene = '', currentPlayback = 0, launchNav = false;
   let currentOutfit, currentSidekick;
@@ -13,43 +12,13 @@
       (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   }
 
-  function stopSky() {
-    if (!skyCallback) return;
-    if (movie.cancelVideoFrameCallback) movie.cancelVideoFrameCallback(skyCallback);
-    else cancelAnimationFrame(skyCallback);
-    skyCallback = 0;
-  }
-
-  function paintSky() {
-    if (!sky.clientHeight || root.hidden) return;
-    const live = !movie.hidden && movie.readyState >= 2;
-    const source = live ? movie : art;
-    const width = live ? movie.videoWidth : art.naturalWidth;
-    const height = live ? movie.videoHeight : art.naturalHeight;
-    if (!width || !height) return;
-    if (sky.width !== width) sky.width = width;
-    // Only these scanlines are above every icon, letter and selection tile.
-    // Blit at native width so that the last sky row and first game row match.
-    const rows = Math.max(1,Math.floor(height * .0018));
-    if (sky.height !== rows) sky.height = rows;
-    skyContext.drawImage(source,0,0,width,rows,0,0,width,rows);
-    if (scene === 'wheel' && (currentOutfit === 'death' || currentSidekick === 'puss')) {
-      skyContext.fillStyle = 'rgba(10,12,21,.58)';
-      skyContext.fillRect(0,0,width,rows);
-    }
-    if (live && !movie.paused && !skyCallback) {
-      const next = () => { skyCallback = 0; paintSky(); };
-      skyCallback = movie.requestVideoFrameCallback ? movie.requestVideoFrameCallback(next) : requestAnimationFrame(next);
-    }
-  }
-
   function make() {
     if (root) return;
     root = document.createElement('section');
     root.className = 'fn-lobby';
     root.setAttribute('aria-label', 'Fortnite');
     root.hidden = true;
-    root.innerHTML = '<canvas class="scene-sky" width="1" height="1" aria-hidden="true"></canvas><div class="scene-world"><img class="scene-art" alt=""><video class="scene-video" playsinline webkit-playsinline preload="auto" disablepictureinpicture disableremoteplayback></video>' +
+    root.innerHTML = '<div class="scene-world"><img class="scene-art" alt=""><video class="scene-video" playsinline webkit-playsinline preload="auto" disablepictureinpicture disableremoteplayback></video>' +
       '<div class="lobby-costume"></div><span class="lobby-vbucks" hidden></span></div><div class="portrait-home"><div class="ph-search">⌕ &nbsp;Biblioteca de apps</div><div class="ph-grid"></div></div>' +
       '<div class="portrait-hud" aria-hidden="true"><i class="ph-play"></i><span class="ph-balance"><i></i><b>800</b></span><i class="ph-avatar"></i></div>' +
       '<div class="lobby-status" hidden><span class="lobby-clock"></span><img alt="" src="lobby-media--status.webp"></div><div class="lobby-input"></div>';
@@ -80,12 +49,6 @@
     costume = root.querySelector('.lobby-costume');
     status = root.querySelector('.lobby-status');
     balance = root.querySelector('.lobby-vbucks');
-    sky = root.querySelector('.scene-sky');
-    skyContext = sky.getContext('2d');
-    new ResizeObserver(paintSky).observe(sky);
-    art.addEventListener('load',paintSky);
-    movie.addEventListener('playing',paintSky);
-    movie.addEventListener('seeked',paintSky);
     movie.controls = false;
     movie.playsInline = true;
     movie.addEventListener('timeupdate', () => {
@@ -116,7 +79,6 @@
 
   function reset(next, poster) {
     currentPlayback++;
-    stopSky();
     movie.onloadeddata = null;
     movie.onended = null;
     movie.onerror = null;
@@ -126,13 +88,11 @@
     art.src = media(poster);
     scene = next;
     root.dataset.scene = next;
-    window.ShopIPadDisplay?.setScene(next);
     delete root.dataset.discover;
     inputs.replaceChildren();
     costume.replaceChildren();
     balance.hidden = true;
     status.hidden = true;
-    paintSky();
   }
 
   function video(file, loop, onEnd, onUnavailable = onEnd) {
@@ -140,12 +100,11 @@
     const valid = () => playId === currentPlayback && !root.hidden;
     movie.loop = loop;
     movie.muted = false;
-    movie.onloadeddata = () => { if (valid()) { movie.hidden = false; paintSky(); } };
+    movie.onloadeddata = () => { if (valid()) movie.hidden = false; };
     movie.onended = () => { if (valid() && onEnd) onEnd(); };
     movie.onerror = () => {
       if (!valid()) return;
       movie.hidden = true;
-      paintSky();
       if (onUnavailable) onUnavailable();
     };
     movie.src = media(file);
@@ -201,7 +160,6 @@
 
   function discoverButtons() {
     root.dataset.discover = 'true';
-    window.ShopIPadDisplay?.setScene('discover');
     const amount = window.ShopState?.balance;
     root.querySelector('.ph-balance b').textContent = Number.isFinite(amount) ? amount.toLocaleString('en-US') : '800';
     inputs.replaceChildren();
@@ -243,7 +201,6 @@
       lobby();
       scene = 'wheel';
       root.dataset.scene = scene;
-      window.ShopIPadDisplay?.setScene('wheel');
       inputs.replaceChildren();
       const overlay = document.createElement('div');
       overlay.className = 'emote-overlay';
@@ -255,7 +212,6 @@
       title.textContent = currentOutfit === 'death' ? 'Outfit Preview' : 'Dance Moves';
       overlay.append(layer,title);
       costume.append(overlay);
-      paintSky();
     } else {
       reset('wheel','wheel.webp');
     }
@@ -310,7 +266,6 @@
 
   function hide() {
     if (!root) return;
-    stopSky();
     currentPlayback++;
     movie.onloadeddata = movie.onended = movie.onerror = null;
     movie.pause();
