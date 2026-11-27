@@ -27,3 +27,25 @@ html dialog.fn-reward { width: auto; height: auto; }
 }
 img, video { -webkit-user-drag: none; }
 :focus-visible { outline: 3px solid white; outline-offset: -2px; }
+
+/* Home Screen launch uses the same document-based player as Fortnite Skin Shop. */
+html.ipad-installed body {
+  position: static;
+  width: 100%;
+  height: 100%;
+}
+html.ipad-installed #stage {
+  position: fixed;
+  inset: 0;
+}
+@media (orientation: landscape) {
+  html.ipad-installed body {
+    position: relative;
+    height: var(--installed-height, 100vh);
+    height: var(--installed-height, 100lvh);
+  }
+  html.ipad-installed #stage {
+    position: absolute;
+    inset: 0;
+  }
+}
