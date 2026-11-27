@@ -18,6 +18,7 @@
   let previousFocus;
   let equipped = {};
   let cards = new Map();
+  let stopPreview;
 
   function owns(id) {
     const owned = options.owned;
@@ -36,6 +37,8 @@
 
   function close() {
     if (!panel) return;
+    stopPreview?.();
+    stopPreview = null;
     panel.remove();
     panel = null;
     cards.clear();
@@ -118,16 +121,20 @@
     };
     if (changed) {
       const figure = panel.querySelector(".lk-figure");
+      stopPreview?.();
       figure.classList.remove("lk-appear");
-      const img = figure.querySelector("img");
+      const img = figure.querySelector(".lk-poster");
       img.alt = item.name;
       img.onerror = () => {
         img.onerror = null;
         if (item.image) img.src = item.image;
       };
       img.src = item.rewardImage || new URL("reward--figures--" + encodeURIComponent(item.id) + ".webp", base).href;
-      void figure.offsetWidth;
-      figure.classList.add("lk-appear");
+      stopPreview = window.ShopRewardMotion?.preview(figure, item.id);
+      if (!stopPreview) {
+        void figure.offsetWidth;
+        figure.classList.add("lk-appear");
+      }
     }
   }
 
@@ -154,7 +161,7 @@
       </div>
       <div class="lk-preview">
         <div class="lk-spot"></div>
-        <div class="lk-figure"><img alt="" draggable="false"></div>
+        <div class="lk-figure"><img class="lk-poster" alt="" draggable="false"></div>
         <div class="lk-selected"><span class="lk-type"></span><h2 class="lk-item-name"></h2><span class="lk-state"></span></div>
         <button class="lk-primary" type="button"></button>
       </div>`;

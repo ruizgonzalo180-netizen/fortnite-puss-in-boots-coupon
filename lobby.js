@@ -5,6 +5,7 @@
   let enterShop, enterLocker;
   let scene = '', currentPlayback = 0, launchNav = false;
   let currentOutfit, currentSidekick;
+  const folders = ['Sugeridas', 'Recientes', 'Utilidades', 'Redes sociales', 'Juegos', 'Ocio', 'Creatividad', 'Productividad y finanzas', 'Información y lectura', 'Otras', 'Ocultas'];
 
   function isIOS() {
     return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
@@ -17,9 +18,31 @@
     root.className = 'fn-lobby';
     root.setAttribute('aria-label', 'Fortnite');
     root.hidden = true;
-    root.innerHTML = '<img class="scene-art" alt=""><video class="scene-video" playsinline webkit-playsinline preload="auto" disablepictureinpicture disableremoteplayback></video>' +
-      '<div class="lobby-costume"></div><span class="lobby-vbucks" hidden></span>' +
+    root.innerHTML = '<div class="scene-world"><img class="scene-art" alt=""><video class="scene-video" playsinline webkit-playsinline preload="auto" disablepictureinpicture disableremoteplayback></video>' +
+      '<div class="lobby-costume"></div></div><div class="portrait-home"><div class="ph-search">⌕ &nbsp;Biblioteca de apps</div><div class="ph-grid"></div></div>' +
+      '<div class="portrait-hud" aria-hidden="true"><i class="ph-play"></i><span class="ph-balance"><i></i><b>800</b></span><i class="ph-avatar"></i></div>' +
+      '<span class="lobby-vbucks" hidden></span>' +
       '<div class="lobby-status" hidden><span class="lobby-clock"></span><img alt="" src="lobby-media--status.webp"></div><div class="lobby-input"></div>';
+    const grid = root.querySelector('.ph-grid');
+    folders.forEach((name,index) => {
+      const cell = document.createElement('div');
+      cell.className = 'ph-folder';
+      const panel = document.createElement('div');
+      panel.className = 'ph-apps';
+      panel.style.backgroundPosition = ((index % 4) * 100 / 3) + '% ' + (Math.floor(index / 4) * 50) + '%';
+      const label = document.createElement('span');
+      label.textContent = name;
+      if (index === 4 || index === 1) {
+        const shortcut = document.createElement('button');
+        shortcut.type = 'button';
+        shortcut.className = index === 4 ? 'ph-fortnite' : 'ph-recent';
+        shortcut.setAttribute('aria-label', index === 4 ? 'Open Fortnite' : 'Open recent Fortnite');
+        shortcut.addEventListener('click',launch);
+        panel.append(shortcut);
+      }
+      cell.append(panel,label);
+      grid.append(cell);
+    });
     document.getElementById('stage').append(root);
     art = root.querySelector('.scene-art');
     movie = root.querySelector('video');
@@ -47,6 +70,9 @@
     btn.type = 'button';
     btn.className = 'lobby-hit';
     btn.setAttribute('aria-label', label);
+    btn.dataset.action = label.toLowerCase().replaceAll(' ','-');
+    const captions = {'Play Battle Royale':'Play','Go to lobby':'Go to lobby','Discover Battle Royale':'Play','Back to Discover':'Back','Emote':'Emote','Back':'Back','Close emotes':'Close','Stop emote':'Stop emote'};
+    if (captions[label]) btn.dataset.caption = captions[label];
     Object.assign(btn.style, {left:x+'%',top:y+'%',width:w+'%',height:h+'%'});
     btn.addEventListener('click',() => handler());
     inputs.append(btn);
@@ -63,13 +89,14 @@
     art.src = media(poster);
     scene = next;
     root.dataset.scene = next;
+    delete root.dataset.discover;
     inputs.replaceChildren();
     costume.replaceChildren();
     balance.hidden = true;
     status.hidden = true;
   }
 
-  function video(file, loop, onEnd) {
+  function video(file, loop, onEnd, onUnavailable = onEnd) {
     const playId = currentPlayback;
     const valid = () => playId === currentPlayback && !root.hidden;
     movie.loop = loop;
@@ -79,14 +106,14 @@
     movie.onerror = () => {
       if (!valid()) return;
       movie.hidden = true;
-      if (onEnd) onEnd();
+      if (onUnavailable) onUnavailable();
     };
     movie.src = media(file);
     movie.play().catch(() => {
       if (!valid() || movie.error) return;
       movie.muted = true;
       movie.play().catch(() => {
-        if (valid()) { movie.hidden = true; if (onEnd) onEnd(); }
+        if (valid()) { movie.hidden = true; if (onUnavailable) onUnavailable(); }
       });
     });
   }
@@ -113,6 +140,7 @@
     }
     if (currentSidekick === 'puss') addPiece('puss-idle.webp','lobby-cat');
     const amount = window.ShopState?.balance;
+    root.querySelector('.ph-balance b').textContent = Number.isFinite(amount) ? amount.toLocaleString('en-US') : '800';
     if (Number.isFinite(amount) && amount !== 800) {
       balance.textContent = amount.toLocaleString('en-US');
       balance.hidden = false;
@@ -132,6 +160,9 @@
   }
 
   function discoverButtons() {
+    root.dataset.discover = 'true';
+    const amount = window.ShopState?.balance;
+    root.querySelector('.ph-balance b').textContent = Number.isFinite(amount) ? amount.toLocaleString('en-US') : '800';
     inputs.replaceChildren();
     button('Shop',17.55,0,5.2,8.8,shop);
     button('Play Battle Royale',2.2,74.9,8.4,7.7,() => lobby(true));
@@ -207,7 +238,17 @@
   function launch() {
     reset('launch','home.webp');
     launchNav = false;
-    video('launch.mp4', false, () => lobby(true));
+    video('launch.mp4', false, () => lobby(true), () => {
+      // Preserve the entry and its navigation when the browser lacks an H.264 decoder.
+      const entryId = ++currentPlayback;
+      const at = (delay,fn) => setTimeout(() => {
+        if (entryId === currentPlayback && !root.hidden) fn();
+      },delay);
+      art.src = media('epic.webp');
+      at(900,() => { art.src = media('loading.webp'); });
+      at(3200,() => { art.src = media('discover.webp'); launchNav = true; discoverButtons(); });
+      at(7200,() => lobby(true));
+    });
   }
 
   function start(onShop, onLocker) {

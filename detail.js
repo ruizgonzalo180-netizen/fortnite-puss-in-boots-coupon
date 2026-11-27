@@ -11,14 +11,15 @@
   ].map(item => ({...item, image: 'detail-media--' + item.id + '-card.webp', rewardImage: 'reward--figures--' + item.id + '.webp'}));
   const bundle = {id: 'bundle', name: 'Puss in Boots Bundle', price: 2400, originalPrice: 4700, itemIds: items.map(item => item.id)};
   const byId = new Map(items.map(item => [item.id, item]));
-  const rotations = {puss: [15.8,21.4], death: [10.0,16.9], bounty: [1.6,5.5]};
-  const repeatFrom = {puss: 1.40, death: 0.70, sickles: 0.55, slippers: 0.45, stalking: 0.40, bounty: 1.35};
+  const rotations = {puss: [16.57,22.17], death: [10.84,17.74], bounty: [1.94,5.84]};
+  const repeatFrom = {puss: 2.17, death: 1.54, sickles: 1.30, slippers: 1.51, stalking: 0.68, bounty: 1.69};
   const sourceRoot = new URL('./', document.currentScript.src);
   const path = relative => new URL(relative, sourceRoot).href;
+  const sceneAsset = name => path('detail-media--' + name) + '?v=native-entry-2';
   const stylesheet = document.createElement('link');
   stylesheet.rel = 'stylesheet';
   stylesheet.href = path('detail.css');
-  if (![...document.styleSheets].some(sheet => sheet.href === stylesheet.href)) document.head.append(stylesheet);
+  if (!document.querySelector('link[data-detail-css]') && ![...document.styleSheets].some(sheet => sheet.href === stylesheet.href)) document.head.append(stylesheet);
   let screen, opts, current, available, buying, selectedOffer;
   let movie, overlay, backFocus, muted = false;
 
@@ -141,6 +142,8 @@
   }
 
   function addVideo() {
+    const world = el('div','dd-panorama');
+    world.setAttribute('aria-hidden','true');
     const video = el('video','dd-model');
     movie = video;
     video.setAttribute('playsinline','');
@@ -149,8 +152,16 @@
     video.muted = muted;
     video.preload = 'auto';
     video.disablePictureInPicture = true;
-    video.src = path('detail-media--' + current.id + '.mp4');
-    video.addEventListener('playing', () => video.classList.add('dd-playing'), {once:true});
+    video.poster = sceneAsset(current.id + '-entry.webp');
+    video.src = sceneAsset(current.id + '.mp4');
+    video.addEventListener('error', () => {
+      if (movie !== video) return;
+      const fallback = el('img','dd-offline-model');
+      fallback.src = path(current.rewardImage);
+      fallback.alt = '';
+      video.style.visibility = 'hidden';
+      world.append(fallback);
+    }, {once:true});
     video.addEventListener('ended', () => {
       if (video !== movie) return;
       video.currentTime = repeatFrom[current.id];
@@ -181,7 +192,13 @@
       area.addEventListener('pointerup', release);
       area.addEventListener('pointercancel',release);
     }
-    screen.append(video,area);
+    const hud = el('div','dd-native-hud');
+    hud.style.backgroundImage = 'url("' + sceneAsset(current.id+'-view.webp') + '")';
+    const portraitTitle = el('img','dd-portrait-title');
+    portraitTitle.src = sceneAsset(current.id+'-title.webp');
+    portraitTitle.alt = current.type + ': ' + current.name;
+    world.append(video);
+    screen.append(world,hud,portraitTitle,area);
     playVideo(video);
   }
 
@@ -190,7 +207,6 @@
     stopMovie();
     current = byId.get(id);
     screen.replaceChildren();
-    screen.style.backgroundImage = 'url("' + path('detail-media--' + current.id + '-view.webp') + '")';
     screen.setAttribute('aria-label', current.name);
     addVideo();
     addStrip();
@@ -280,8 +296,10 @@
       original.src = path('detail-media--bundle-price.webp');
       original.alt = 'The price for included items is: 2,400 V-Bucks (originally 4,700).';
       screen.append(original);
-    } else {
+    }
+    {
       const priceRow = el('div','dd-prices');
+      if (opts.bundle && !gotAll && !discount && price === bundle.price) priceRow.classList.add('dd-portrait-prices');
       const caption = gotAll ? (opts.bundle ? 'Bundle in your locker' : 'In your locker') : discount ? 'Black Friday Coupon applied' : (available.length > 1 ? 'The price for included items is:' : 'Item price');
       priceRow.append(el('div','dd-price-caption',caption));
       const amount = el('div','dd-price');
@@ -323,6 +341,18 @@
     });
     sound.setAttribute('aria-pressed',String(muted));
     screen.append(sound);
+    const other = action('More options','dd-more',() => {
+      const entries = [
+        [liked ? 'Remove from favorites' : 'Add to favorites',() => { like.click(); closePanel(); }],
+        [muted ? 'Enable audio' : 'Mute audio',() => { sound.click(); closePanel(); }],
+        ['Replay preview',() => { closePanel(); movie.currentTime=0; playVideo(movie); }],
+        ['Gift',() => screen.querySelector('.dd-gift').click()]
+      ];
+      if (current.id === 'puss') entries.push(['About Sidekicks',() => screen.querySelector('.dd-about').click()]);
+      panel('OPTIONS',current.name,entries);
+    });
+    other.textContent = '\u2022\u2022\u2022';
+    screen.append(other);
     if (current.id === 'puss') {
       screen.append(action('About Sidekicks','dd-hit dd-about',() => panel('ABOUT SIDEKICKS',"Sidekicks react to the world around you. In Battle Royale, you can only see your team's Sidekicks.")));
     }

@@ -76,3 +76,114 @@
   position: absolute; left: 35%; top: 29.6%; width: 30%;
   text-align: center; color: #fff; font: 700 1.05cqw/1.2 Arial,sans-serif;
 }
+.fn-lobby .scene-world { position: absolute; inset: 0; }
+.fn-lobby .portrait-home, .fn-lobby .portrait-hud { display: none; }
+
+@media (orientation: portrait) {
+  .fn-lobby {
+    --pad: max(3cqw, env(safe-area-inset-left));
+    --top: max(2cqh, env(safe-area-inset-top));
+    --bottom: max(2.8cqh, env(safe-area-inset-bottom));
+    --hud-unit: clamp(40px,7cqw,59px);
+  }
+  .fn-lobby[data-scene="home"] .scene-world, .fn-lobby[data-scene="home"] .lobby-input { display: none; }
+  .fn-lobby[data-scene="home"] .portrait-home {
+    position: absolute; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: space-evenly;
+    padding: max(4cqh, env(safe-area-inset-top)) 4cqw max(3cqh,env(safe-area-inset-bottom));
+    background: #0a2550 url("lobby-media--home-wallpaper.webp") center/cover;
+  }
+  .fn-lobby .ph-search {
+    min-width: 51%; border-radius: 999px;
+    border: 1px solid #a8b8fa40; background: #8a9eca30;
+    padding: min(1.2cqh,12px) 3cqw; text-align: center;
+    font: 500 clamp(13px,2.1cqw,19px)/1.2 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    color: #f4f5ff;
+  }
+  .fn-lobby .ph-grid {
+    display: grid; grid-template-columns: repeat(3,1fr); align-items: start;
+    width: min(88cqw,79cqh); column-gap: 4%; row-gap: min(2.1cqh,22px);
+  }
+  .fn-lobby .ph-folder { min-width: 0; display: flex; flex-direction: column; align-items: center; gap: .6cqh; }
+  .fn-lobby .ph-apps {
+    flex: none; position: relative; width: min(100%,15.2cqh); aspect-ratio: 1;
+    background: url("lobby-media--home-folders.webp") no-repeat; background-size: 400% 300%;
+  }
+  .fn-lobby .ph-folder span {
+    font: 500 clamp(10px,1.65cqw,16px)/1.15 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    color: white; text-align: center;
+  }
+  .fn-lobby .ph-apps button {
+    position: absolute; border: 0; background: transparent; border-radius: 21%; padding: 0;
+    appearance: none; -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+  }
+  .fn-lobby .ph-fortnite { left: 4%; top: 4%; width: 43%; height: 43%; }
+  .fn-lobby .ph-recent { left: 53%; top: 72%; width: 22%; height: 23%; }
+  .fn-lobby .lobby-clock { top: .8cqh; left: 3cqw; font-size: 1.9cqw; }
+  .fn-lobby .lobby-status img { width: 8cqw; height: auto; left: auto; right: 2.2cqw; top: .4cqh; }
+  .fn-lobby .scene-art, .fn-lobby .scene-video { object-fit: cover; object-position: 50% 50%; }
+  /* Preserve the entire avatar and register its equipment to the original video pixels. */
+  .fn-lobby:is([data-scene="lobby"],[data-scene="dance"],[data-scene="wheel"]) .scene-world {
+    inset: auto; top: -9.3cqh; left: 50%; width: 182.75cqh; height: 120cqh;
+    transform: translateX(-51%); 
+  }
+  .fn-lobby:is([data-scene="lobby"],[data-scene="dance"],[data-scene="wheel"]) .scene-art,
+  .fn-lobby:is([data-scene="lobby"],[data-scene="dance"],[data-scene="wheel"]) .scene-video { object-fit: fill; }
+  .fn-lobby[data-discover="true"] .scene-world {
+    inset: auto; left: 50%; top: -10cqh; width: 189cqh; height: 124cqh; transform: translateX(-64%);
+  }
+  .fn-lobby[data-discover="true"] .scene-art, .fn-lobby[data-discover="true"] .scene-video { object-fit: fill; }
+  .fn-lobby:is([data-scene="lobby"],[data-scene="dance"],[data-discover="true"]) .portrait-hud {
+    pointer-events: none; display: block; position: absolute; inset: 0;
+    background: linear-gradient(to bottom,#070e2999,transparent 14%);
+  }
+  .fn-lobby .portrait-hud i, .fn-lobby .lobby-hit:is([data-action="shop"],[data-action="locker"])::before {
+    content: ""; display: block; width: var(--hud-unit); height: var(--hud-unit);
+    background-image: url("lobby-media--portrait-nav.webp");
+    background-repeat: no-repeat; background-size: 500% 100%;
+  }
+  .fn-lobby .ph-play { position: absolute; top: var(--top); left: var(--pad); background-position: 0% 50%; }
+  .fn-lobby .ph-avatar { position: absolute; top: var(--top); right: var(--pad); background-position: 100% 50%; }
+  .fn-lobby .ph-balance { position: absolute; display: flex; align-items: center; top: var(--top); right: calc(var(--pad) + var(--hud-unit) + 2cqw); gap: .4cqw; }
+  .fn-lobby .ph-balance i { background-position: 75% 50%; width: calc(var(--hud-unit) * .9); height: var(--hud-unit); }
+  .fn-lobby .ph-balance b { color: white; font: 900 clamp(14px,2.35cqw,22px)/1 Arial,sans-serif; }
+  .fn-lobby .lobby-vbucks { display: none; }
+  .fn-lobby .lobby-hit:is([data-action="shop"],[data-action="locker"]) {
+    top: var(--top) !important; width: var(--hud-unit) !important; height: var(--hud-unit) !important;
+    border-radius: 12%; 
+  }
+  .fn-lobby .lobby-hit[data-action="locker"] { left: calc(var(--pad) + var(--hud-unit) + 2cqw) !important; }
+  .fn-lobby .lobby-hit[data-action="shop"] { left: calc(var(--pad) + 2 * var(--hud-unit) + 4cqw) !important; }
+  .fn-lobby[data-discover="true"] .lobby-hit[data-action="shop"] { left: calc(var(--pad) + var(--hud-unit) + 2cqw) !important; }
+  .fn-lobby .lobby-hit[data-action="shop"]::before { background-position: 50% 50%; }
+  .fn-lobby .lobby-hit[data-action="locker"]::before { background-position: 25% 50%; }
+  .fn-lobby .lobby-hit[data-caption] {
+    inset: auto !important; bottom: var(--bottom) !important; right: var(--pad) !important;
+    width: auto !important; height: auto !important; min-height: clamp(39px,5.4cqh,56px);
+    padding: .5cqh 3.5cqw; border-radius: min(1.6cqw,11px);
+    background: #eea155; color: #321e12;
+    font: 900 clamp(13px,2.5cqw,20px)/1 Arial,sans-serif; text-transform: uppercase;
+  }
+  .fn-lobby .lobby-hit[data-caption]::before { content: attr(data-caption); }
+  .fn-lobby .lobby-hit:is([data-action="discover-battle-royale"],[data-action="play-battle-royale"]) {
+    left: var(--pad) !important; right: auto !important; width: 24cqw !important;
+    background: #f3ff18; color: #17170a;
+  }
+  .fn-lobby .lobby-hit[data-action="discover-battle-royale"]::after,
+  .fn-lobby .lobby-hit[data-action="play-battle-royale"]::after {
+    content: 'BATTLE ROYALE'; position: absolute; bottom: calc(100% + 1cqh); left: 0;
+    font-weight: 1000; font-size: clamp(17px,3.6cqw,31px); text-align: left;
+    line-height: .98; color: white; text-shadow: 0 1px 4px #211b17;
+  }
+  .fn-lobby .lobby-hit[data-action="emote"] { right: calc(var(--pad) + 17cqw) !important; }
+  .fn-lobby .lobby-hit[data-action="stop-emote"] { left: var(--pad) !important; right: auto !important; }
+  .fn-lobby .lobby-hit:is([data-action="dance-moves"],[data-action="outfit-preview"]) {
+    left: 20% !important; top: 29% !important; width: 60% !important; height: 34% !important;
+  }
+}
+
+@media (orientation: portrait) and (max-aspect-ratio: 3/5) {
+  .fn-lobby .ph-grid { grid-template-columns: repeat(2,1fr); width: 78cqw; row-gap: 1.2cqh; }
+  .fn-lobby .ph-apps { width: min(100%,11.5cqh); }
+  .fn-lobby .ph-search { min-width: 68%; }
+}

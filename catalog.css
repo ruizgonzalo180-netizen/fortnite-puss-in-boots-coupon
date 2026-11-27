@@ -34,7 +34,13 @@
   margin: 0;
   padding: 0;
   background: transparent;
+  left: var(--pc-x);
+  top: var(--pc-y);
+  width: var(--pc-w);
+  height: var(--pc-h);
 }
+#puss-catalog .pc-nav, #puss-catalog .pc-footers { display:contents; }
+#puss-catalog .pc-native-balance {display:none}
 #puss-catalog .pc-hit, #puss-catalog .pc-footer { z-index: 3; }
 #puss-catalog .pc-hit:focus-visible,
 #puss-catalog .pc-footer:focus-visible,
@@ -138,4 +144,89 @@
 @media (prefers-reduced-motion:reduce) {
   #puss-catalog .pc-shade { animation:none; opacity:.2; }
   #puss-catalog .pc-card { transition:none; }
+}
+@media (orientation: portrait) {
+  #puss-catalog {
+    --pc-gap: clamp(6px,1.1cqw,12px);
+    --pc-edge: max(3cqw,env(safe-area-inset-left),env(safe-area-inset-right));
+    --pc-head: max(1.1cqw,env(safe-area-inset-top));
+    --pc-nav-width: 80cqw;
+    --pc-nav-height: calc(var(--pc-nav-width) * .10442);
+    --pc-title-top: calc(var(--pc-head) + var(--pc-nav-height) + 2.5cqw);
+    background: radial-gradient(ellipse at 92% 49%,#057fb9,#074982 49%,#071a46 88%);
+  }
+  #puss-catalog .pc-shade,
+  #puss-catalog .pc-bar-wash,
+  #puss-catalog .pc-rail-fill,
+  #puss-catalog .pc-rail-hit { display:none; }
+  #puss-catalog::before, #puss-catalog::after {
+    content:""; position:absolute; pointer-events:none;
+    background: center / contain no-repeat;
+  }
+  #puss-catalog::before {
+    right:var(--pc-edge); top:var(--pc-head); width:7.5cqw; aspect-ratio:1;
+    background-image:url(catalog-media--portrait-profile.webp);
+  }
+  #puss-catalog::after {
+    left:calc(var(--pc-edge) + 8.3cqw); top:calc(var(--pc-title-top) + 1.08cqw);
+    width:43cqw; aspect-ratio:509/50;
+    background-image:url(catalog-media--portrait-title.webp);
+  }
+  #puss-catalog .pc-nav {
+    display:block; position:absolute; z-index:3;
+    left:var(--pc-edge); top:var(--pc-head); width:var(--pc-nav-width); height:var(--pc-nav-height);
+    background:url(catalog-media--portrait-navigation.webp) center / 100% 100% no-repeat;
+  }
+  #puss-catalog .pc-nav .pc-hit {
+    left:var(--nav-left); top:var(--nav-top); width:var(--nav-width); height:var(--nav-height);
+  }
+  #puss-catalog .pc-balance {
+    display:block; top:32%; left:94.1%; width:auto; min-width:0;
+    background:transparent; font-size:1.88cqw;
+  }
+  #puss-catalog .pc-filter {
+    left:var(--pc-edge); top:var(--pc-title-top); width:6.5cqw; height:auto; aspect-ratio:92/91;
+    background: url(catalog-media--portrait-filter.webp) center/contain no-repeat;
+  }
+  #puss-catalog .pc-shelf {
+    left:0; right:0; top:calc(var(--pc-title-top) + 7.8cqw);
+    bottom:calc(max(7cqh,58px + env(safe-area-inset-bottom)) + min(12.58cqw,102.4px) + 1cqw);
+    padding-inline:var(--pc-edge);
+  }
+  #puss-catalog .pc-rows {
+    display:grid; gap:var(--pc-gap); grid-template-columns:repeat(4,minmax(0,1fr));
+    align-content:start; align-items:end; height:auto; min-height:0; padding:1cqw 0;
+  }
+  #puss-catalog .pc-card {
+    position:relative; inset:auto; width:100%; height:auto; aspect-ratio:var(--pc-ratio);
+  }
+  #puss-catalog .pc-card[data-item="bundle"] { grid-column:1/-1; }
+  #puss-catalog .pc-card[data-item="puss"], #puss-catalog .pc-card[data-item="death"] { grid-column:span 2; }
+  #puss-catalog .pc-card img { object-fit:contain; }
+  #puss-catalog .pc-card .pc-price {
+    left:.4cqw; bottom:.35cqw; min-width:10cqw; padding:.12cqw .65cqw;
+    font-size:2cqw;
+  }
+  #puss-catalog .pc-card .pc-price.coupon { min-width:17cqw; }
+  #puss-catalog .pc-footers {
+    display:flex; position:absolute; z-index:3; align-items:center; justify-content:flex-end;
+    left:var(--pc-edge); right:var(--pc-edge); bottom:max(1.6cqw,env(safe-area-inset-bottom));
+    gap:var(--pc-gap);
+  }
+  #puss-catalog .pc-footer {
+    flex:0 1 auto; position:relative; inset:auto; width:auto;
+    height:clamp(28px,5.65cqw,56px); aspect-ratio:var(--pc-ratio);
+  }
+  #puss-catalog .pc-panel { width:min(70cqw,490px); padding:2.6cqw; border-radius:2cqw; font-size:clamp(14px,2.15cqw,22px); }
+  #puss-catalog .pc-panel h2 { font-size:clamp(21px,3.6cqw,32px); }
+  #puss-catalog .pc-panel input, #puss-catalog .pc-panel button {
+    padding:1.15cqw 1.6cqw; font-size:clamp(14px,2cqw,21px); border-radius:.9cqw;
+  }
+  #puss-catalog .pc-results {gap:.65cqw}
+}
+@media (orientation: portrait) and (max-width: 620px) {
+  #puss-catalog .pc-rows {grid-template-columns:repeat(2,minmax(0,1fr));}
+  #puss-catalog .pc-card[data-item="puss"], #puss-catalog .pc-card[data-item="death"] {grid-column:span 1;}
+  #puss-catalog .pc-card .pc-price {font-size:2.55cqw; min-width:12.5cqw}
+  #puss-catalog .pc-panel {width:min(92cqw,470px);}
 }

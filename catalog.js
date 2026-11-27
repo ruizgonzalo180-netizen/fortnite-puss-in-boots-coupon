@@ -2,10 +2,12 @@
   'use strict';
   const moduleBase = new URL('.', document.currentScript?.src || document.baseURI);
   const media = name => new URL('catalog-media--' + name + '.webp', moduleBase).href;
-  const css = document.createElement('link');
-  css.rel = 'stylesheet';
-  css.href = new URL('catalog.css', moduleBase).href;
-  document.head.append(css);
+  if (!document.querySelector('link[data-catalog-css]')) {
+    const css = document.createElement('link');
+    css.rel = 'stylesheet';
+    css.href = new URL('catalog.css', moduleBase).href;
+    document.head.append(css);
+  }
 
   const cards = [
     {id:'bundle', name:'Puss in Boots Bundle', rect:[448,298,1121,352]},
@@ -36,15 +38,16 @@
   }
   function position(element, rect) {
     const [x,y,w,h] = rect;
-    Object.assign(element.style,{
-      left: (x/2266*100)+'cqw', top: (y/1488*100)+'cqh',
-      width:(w/2266*100)+'cqw', height:(h/1488*100)+'cqh'
-    });
+    element.style.setProperty('--pc-x',(x/2266*100)+'cqw');
+    element.style.setProperty('--pc-y',(y/1488*100)+'cqh');
+    element.style.setProperty('--pc-w',(w/2266*100)+'cqw');
+    element.style.setProperty('--pc-h',(h/1488*100)+'cqh');
+    element.style.setProperty('--pc-ratio', w + ' / ' + h);
   }
-  function hit(label, rect, onClick, className = 'pc-hit') {
+  function hit(label, rect, onClick, className = 'pc-hit', host = root) {
     const b = button(label,onClick,className);
     position(b, rect);
-    root.append(b);
+    host.append(b);
     return b;
   }
   function getOwned(id) {
@@ -152,32 +155,44 @@
     }
   }
   function mountHud() {
-    hit('Search',[48,0,116,117],() => itemList('Search',cards,true));
-    hit('Favorites',[166,0,112,117],() => {
+    const nav = node('nav','pc-nav');
+    nav.setAttribute('aria-label','Shop navigation');
+    root.append(nav);
+    function navButton(label,rect,action) {
+      const b = hit(label,rect,action,'pc-hit',nav);
+      const [x,y,w,h] = rect;
+      b.style.setProperty('--nav-left',(x-48)/1312*100+'%');
+      b.style.setProperty('--nav-top',y/137*100+'%');
+      b.style.setProperty('--nav-width',w/1312*100+'%');
+      b.style.setProperty('--nav-height',h/137*100+'%');
+    }
+    navButton('Search',[48,0,116,117],() => itemList('Search',cards,true));
+    navButton('Favorites',[166,0,112,117],() => {
       const saved = readStorage('puss-shop-favorites',[]);
       itemList('Favorites',cards.filter(c => saved.includes(c.id)),false);
     });
-    hit('Play — return to lobby',[277,0,115,120],goBack);
-    hit('Shop',[506,8,120,125],() => shelf.scrollTo({top:0,behavior:'smooth'}));
-    if (options.onLocker) hit('Locker',[394,0,114,118],() => options.onLocker());
-    hit('V-Bucks balance',[1206,0,169,114],() => note('V-Bucks',Number(options.balance ?? 800).toLocaleString('en-US')+' V-Bucks'));
-    if(Number(options.balance ?? 800) !== 800) {
-      root.append(node('span','pc-balance',Number(options.balance).toLocaleString('en-US')));
-    }
-    hit('Browse Puss in Boots items',[310,149,92,91],() => itemList('Puss in Boots',cards,false));
+    navButton('Play — return to lobby',[277,0,115,120],goBack);
+    navButton('Shop',[506,8,120,125],() => shelf.scrollTo({top:0,behavior:'smooth'}));
+    if (options.onLocker) navButton('Locker',[394,0,114,118],() => options.onLocker());
+    navButton('V-Bucks balance',[1206,0,169,114],() => note('V-Bucks',Number(options.balance ?? 800).toLocaleString('en-US')+' V-Bucks'));
+    const balance = Number(options.balance ?? 800);
+    nav.append(node('span','pc-balance'+(balance===800?' pc-native-balance':''),balance.toLocaleString('en-US')));
+    hit('Browse Puss in Boots items',[310,149,92,91],() => itemList('Puss in Boots',cards,false),'pc-hit pc-filter');
     hit('Scroll through Puss in Boots',[310,261,94,759],e => {
       const bounds = e.currentTarget.getBoundingClientRect();
       const fraction = Math.max(0,Math.min(1,(e.clientY - bounds.top)/bounds.height));
       shelf.scrollTo({top:fraction*(shelf.scrollHeight-shelf.clientHeight),behavior:'smooth'});
-    });
+    },'pc-hit pc-rail-hit');
     const controls = [
       ['Support a Creator',[1213,1360,480,77],supportCreator],
       ['About Shop',[1714,1360,249,77],() => note('About Shop','Select a card to preview an item. Tap the red Black Friday coupon to claim all six items in the Puss in Boots Bundle.')],
       ['Voice Chat',[1983,1360,77,77],() => note('Voice Chat','No party members connected.')],
       ['Chat',[2080,1360,142,77],() => note('Party Chat','No party members connected.')]
     ];
+    const footer = node('footer','pc-footers');
+    root.append(footer);
     controls.forEach(([title,rect,fn],i) => {
-      const b = hit(title,rect,fn,'pc-footer');
+      const b = hit(title,rect,fn,'pc-footer',footer);
       const img = node('img');
       img.alt = '';
       img.src = media('footer-'+i);

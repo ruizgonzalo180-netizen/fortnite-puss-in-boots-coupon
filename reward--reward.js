@@ -4,6 +4,104 @@
   const scriptBase = new URL(".", document.currentScript.src);
   const resource = (file) => new URL("reward--" + file.replaceAll("/", "--"), scriptBase).href;
   const figureIds = new Set(["puss", "death", "sickles", "slippers", "stalking", "bounty"]);
+  const geometry = {
+    puss: {w:444,h:570,iw:518,ih:836,dx:-37,dy:-189.69,seconds:10.833333},
+    death: {w:446,h:756,iw:518,ih:916,dx:-39.82,dy:-119.62,seconds:.458333},
+    sickles: {w:576,h:416,iw:648,ih:1148,dx:-51.3,dy:-380.06,seconds:.5},
+    slippers: {w:604,h:440,iw:706,ih:826,dx:-51.04,dy:-322.78,seconds:.666667},
+    stalking: {w:712,h:660,iw:712,ih:660,dx:0,dy:0,seconds:.333333},
+    bounty: {w:348,h:670,iw:390,ih:734,dx:-21.99,dy:-28.28,seconds:.916667}
+  };
+  let imageSequence = 0;
+  const animationBytes = new Map();
+
+  function freshAnimationURL(url, sequence) {
+    if (location.protocol === "file:") return Promise.resolve(url + "?play=" + sequence);
+    if (!animationBytes.has(url)) {
+      animationBytes.set(url, fetch(url).then(response => {
+        if (!response.ok) throw Error("Animation unavailable");
+        return response.blob();
+      }).catch(error => {
+        animationBytes.delete(url);
+        throw error;
+      }));
+    }
+    return animationBytes.get(url).then(bytes => URL.createObjectURL(bytes));
+  }
+
+  function discardPreviewImage(image) {
+    if (!image) return;
+    image.onload = image.onerror = null;
+    image.remove();
+    if (image.src.startsWith("blob:")) URL.revokeObjectURL(image.src);
+  }
+
+  function alignMedia(element, container, id, intro) {
+    const {w,h,iw,ih,dx,dy} = geometry[id];
+    const width = container.clientWidth;
+    const height = container.clientHeight;
+    const scale = Math.min(width / w, height / h);
+    element.style.width = (intro ? iw : w) * scale + "px";
+    element.style.height = (intro ? ih : h) * scale + "px";
+    element.style.left = (width - w * scale) / 2 + (intro ? dx * scale : 0) + "px";
+    element.style.top = (height - h * scale) / 2 + (intro ? dy * scale : 0) + "px";
+  }
+
+  function preview(container, id, firstPhase = "intro", onPaint, onFailure) {
+    if (!container || !figureIds.has(id)) return null;
+    let phase = firstPhase;
+    let mounted;
+    let pending;
+    let timer;
+    let alive = true;
+    const sequence = ++imageSequence;
+    container.classList.add("fn-preview-live");
+    const resize = new ResizeObserver(() => {
+      if (mounted) alignMedia(mounted, container, id, phase === "intro");
+    });
+    resize.observe(container);
+    function remove() {
+      alive = false;
+      clearTimeout(timer);
+      resize.disconnect();
+      discardPreviewImage(pending);
+      discardPreviewImage(mounted);
+      container.classList.remove("fn-preview-live");
+    }
+    function load(folder) {
+      const image = new Image();
+      pending = image;
+      image.className = "fn-preview-image";
+      image.dataset.phase = folder;
+      image.setAttribute("aria-hidden", "true");
+      image.draggable = false;
+      image.onload = () => {
+        if (!alive) return;
+        phase = folder;
+        alignMedia(image, container, id, folder === "intro");
+        container.append(image);
+        discardPreviewImage(mounted);
+        mounted = image;
+        pending = null;
+        container.classList.add("fn-preview-live");
+        onPaint?.(folder);
+        if (folder === "intro") timer = setTimeout(() => load("motion"), geometry[id].seconds * 1000);
+      };
+      image.onerror = () => {
+        if (!alive) return;
+        if (folder === "intro") { discardPreviewImage(image); load("motion"); }
+        else { remove(); onFailure?.(); }
+      };
+      const url = resource(folder + "/" + id + ".webp");
+      freshAnimationURL(url, sequence).then(src => {
+        if (alive && image === pending) image.src = src;
+        else if (src.startsWith("blob:")) URL.revokeObjectURL(src);
+      }).catch(() => { if (alive && image === pending) image.src = url + "?play=" + sequence; });
+    }
+    load(firstPhase);
+    return remove;
+  }
+  window.ShopRewardMotion = {preview: (container, id) => preview(container, id)};
   const style = document.createElement("link");
   style.rel = "stylesheet";
   style.href = resource("reward.css") + new URL(document.currentScript.src).search;
@@ -27,10 +125,8 @@
   dialog.innerHTML = `
     <div class="fn-processing" aria-label="Processing purchase" role="status"><i></i></div>
     <section class="fn-stage" hidden>
-      <video class="fn-plate" playsinline muted preload="auto" aria-hidden="true"></video>
       <div class="fn-heading"><h2>Items acquired</h2><p>Thanks for playing Fortnite!</p></div>
       <div class="fn-figure"><img alt=""><video class="fn-motion-source" playsinline muted loop preload="none" aria-hidden="true"></video></div>
-      <div class="fn-flash" aria-hidden="true"></div>
       <div class="fn-info" aria-live="polite">
         <span class="fn-type"></span><h2 class="fn-name"></h2><p class="fn-description"></p>
       </div>
@@ -42,18 +138,11 @@
     </section>`;
   const find = (s) => dialog.querySelector(s);
   const stage = find(".fn-stage");
-  const plate = find(".fn-plate");
   const figure = find(".fn-figure");
-  const flash = find(".fn-flash");
   const strip = find(".fn-strip");
   const loader = find(".fn-processing");
   const equip = find(".fn-equip");
-  plate.src = resource("acquisition.mp4");
   const movie = find(".fn-motion-source");
-  const animatedImage = document.createElement("img");
-  animatedImage.className = "fn-motion-image";
-  animatedImage.alt = "";
-  figure.append(animatedImage);
   let canvas = document.createElement("canvas");
   canvas.className = "fn-motion-canvas";
   canvas.setAttribute("aria-hidden", "true");
@@ -61,6 +150,13 @@
   let painter;
   let pendingFrame;
   let expectedVideo = "";
+  let removeImagePreview;
+  let revealTimer;
+  let paintedPhase;
+  let painterItem;
+  new ResizeObserver(() => {
+    if (paintedPhase) alignMedia(canvas, figure, painterItem, paintedPhase === "intro");
+  }).observe(figure);
 
   // Each H.264 frame carries the original color image above the matching matte.
   // The two halves share a decoder, timestamp and loop point on Safari.
@@ -125,13 +221,18 @@
     };
   }
 
-  function stopMotion() {
+  function stopMotion(keepFrame = false) {
     expectedVideo = "";
-    figure.classList.remove("fn-moving", "fn-image-mode");
-    animatedImage.onload = null;
-    animatedImage.removeAttribute("src");
+    clearTimeout(revealTimer);
+    if (!keepFrame) {
+      paintedPhase = null;
+      removeImagePreview?.();
+      removeImagePreview = null;
+      figure.classList.remove("fn-moving", "fn-image-mode", "fn-waiting");
+    }
     movie.onplaying = null;
     movie.onerror = null;
+    movie.onended = null;
     if (pendingFrame !== undefined) {
       if (movie.cancelVideoFrameCallback) movie.cancelVideoFrameCallback(pendingFrame);
       else cancelAnimationFrame(pendingFrame);
@@ -144,20 +245,24 @@
     }
   }
 
-  function playMotion(item, request) {
-    stopMotion();
+  function playMotion(item, request, folder = "intro") {
+    stopMotion(folder === "motion");
     if (!figureIds.has(item.id)) return;
-    expectedVideo = resource("motion/" + item.id + ".mp4");
+    if (folder === "intro") figure.classList.add("fn-waiting");
+    expectedVideo = resource(folder + "/" + item.id + ".mp4");
+    movie.loop = folder === "motion";
     let lastTime = -1;
     let imageFallback = false;
     function useAnimatedImage() {
       if (request !== playbackId || !active || imageFallback) return;
       imageFallback = true;
-      stopMotion();
-      animatedImage.onload = () => {
-        if (request === playbackId && active) figure.classList.add("fn-moving", "fn-image-mode");
-      };
-      animatedImage.src = resource("motion/" + item.id + ".webp");
+      stopMotion(true);
+      removeImagePreview = preview(figure, item.id, folder, phase => {
+        if (request !== playbackId || !active) return;
+        figure.dataset.phase = phase;
+        figure.classList.remove("fn-waiting");
+        figure.classList.add("fn-moving", "fn-image-mode");
+      }, () => figure.classList.remove("fn-moving", "fn-image-mode", "fn-waiting"));
     }
     function draw() {
       pendingFrame = undefined;
@@ -168,6 +273,11 @@
           canvas.width = movie.videoWidth;
           canvas.height = height;
         }
+        if (paintedPhase !== folder || painterItem !== item.id) {
+          paintedPhase = folder;
+          painterItem = item.id;
+          alignMedia(canvas, figure, item.id, folder === "intro");
+        }
         try {
           if (!painter) painter = makeGpuPainter() || useSoftwarePainter();
           painter();
@@ -176,12 +286,17 @@
           catch { useAnimatedImage(); return; }
         }
         lastTime = movie.currentTime;
+        figure.dataset.phase = folder;
+        figure.classList.remove("fn-waiting");
         figure.classList.add("fn-moving");
       }
       pendingFrame = movie.requestVideoFrameCallback ? movie.requestVideoFrameCallback(draw) : requestAnimationFrame(draw);
     }
     movie.onerror = useAnimatedImage;
     movie.onplaying = () => { if (pendingFrame === undefined) draw(); };
+    movie.onended = () => {
+      if (folder === "intro" && active && request === playbackId) playMotion(item, request, "motion");
+    };
     movie.muted = true;
     movie.src = expectedVideo;
     movie.play().catch(useAnimatedImage);
@@ -193,7 +308,6 @@
     playbackId++;
     clearTimeout(purchaseTimer);
     sound.pause();
-    plate.pause();
     stopMotion();
     dialog.close();
     if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true });
@@ -202,7 +316,7 @@
     if (typeof closeAction === "function") closeAction(item);
   }
 
-  function showItem(index) {
+  function showItem(index, first = false) {
     selected = index;
     const item = inventory[index];
     const request = ++playbackId;
@@ -216,13 +330,21 @@
     };
     img.src = isolated || item.image;
     figure.classList.toggle("fn-card-art", !isolated);
-    playMotion(item, request);
+    stopMotion();
+    figure.dataset.phase = "pending";
+    if (figureIds.has(item.id)) {
+      figure.classList.add("fn-waiting");
+      // The acquisition recording shows the empty stage, then the cyan scanner.
+      revealTimer = setTimeout(() => {
+        if (request === playbackId && active) playMotion(item, request);
+      }, first ? 430 : 90);
+    }
     find(".fn-name").textContent = item.name;
     find(".fn-type").textContent = item.type || "";
     find(".fn-description").textContent = item.description || "";
     equip.disabled = typeof equipAction !== "function";
     stage.classList.remove("fn-enter");
-    void flash.offsetWidth;
+    void figure.offsetWidth;
     stage.classList.add("fn-enter");
     Array.from(strip.children).forEach((button, i) => {
       button.setAttribute("aria-pressed", String(index === i));
@@ -231,14 +353,6 @@
       const tile = strip.children[index];
       strip.scrollLeft = tile.offsetLeft - (strip.clientWidth - tile.offsetWidth) / 2;
     }
-    plate.onplaying = () => {
-      if (request === playbackId) stage.classList.add("fn-native");
-    };
-    plate.onerror = () => stage.classList.remove("fn-native");
-    plate.currentTime = 0;
-    plate.play().catch(() => {
-      if (request === playbackId && !plate.ended) stage.classList.remove("fn-native");
-    });
   }
 
   function fallbackFigure(item) {
@@ -255,7 +369,7 @@
     img.src = item.image || item.rewardImage || fallbackFigure(item);
     button.append(img);
     button.addEventListener("click", () => {
-      if (index !== selected) showItem(index);
+      showItem(index);
     });
     return button;
   }
@@ -288,7 +402,7 @@
     equipAction = onEquip;
     stage.hidden = true;
     loader.hidden = false;
-    stage.classList.remove("fn-native", "fn-enter");
+    stage.classList.remove("fn-enter", "fn-opening");
     strip.replaceChildren(...inventory.map(makeThumb));
     dialog.showModal();
     sound.currentTime = 0;
@@ -296,8 +410,9 @@
     purchaseTimer = setTimeout(() => {
       loader.hidden = true;
       stage.hidden = false;
-      showItem(0);
-      find(".fn-claim").focus({ preventScroll: true });
-    }, 650);
+      stage.classList.add("fn-opening");
+      showItem(0, true);
+      dialog.focus({ preventScroll: true });
+    }, 510);
   };
 })();

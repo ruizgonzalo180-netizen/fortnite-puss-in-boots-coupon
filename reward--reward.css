@@ -66,7 +66,7 @@ dialog.fn-reward {
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  background: #073c76 url("reward--reward-background.webp") center/100% 100% no-repeat;
+  background: #073c76 url("reward--acquired-stage.webp") center/100% 100% no-repeat;
   container-type: inline-size;
 }
 .fn-stage h2, .fn-stage p { margin: 0; }
@@ -76,10 +76,17 @@ dialog.fn-reward {
   letter-spacing: -.045em;
 }
 .fn-stage p { color: #e2edfb; font-size: clamp(10px, 1.14cqw, 27px); margin-top: .42em; }
-.fn-plate { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; z-index: -1; opacity: 0; }
-.fn-native .fn-plate { opacity: 1; }
-.fn-heading { position: absolute; left: 3.3%; top: 18.5%; width: 31%; }
-.fn-native .fn-heading { visibility: hidden; }
+.fn-heading {
+  position: absolute; left: 2.383%; top: 17.338%; width: 25.596%; height: 8.602%;
+  background: url("reward--acquired-heading.webp") center/100% 100% no-repeat;
+}
+.fn-heading > * { position: absolute; width: 1px; height: 1px; clip-path: inset(50%); overflow: hidden; }
+.fn-opening .fn-heading { animation: fn-heading-in .34s ease-out .065s both; }
+@keyframes fn-heading-in {
+  from { opacity: 0; transform: translateX(-9%); } to { opacity: 1; transform: none; }
+}
+.fn-opening .fn-strip { animation: fn-info-in .37s ease-out .07s both; }
+.fn-opening .fn-actions { animation: fn-info-in .25s ease-out .35s both; }
 .fn-info { position: absolute; top: 18.6%; left: 67.25%; width: 30%; }
 .fn-type {
   display: block;
@@ -126,43 +133,19 @@ dialog.fn-reward {
 }
 .fn-moving > img { visibility: hidden; }
 .fn-moving .fn-motion-canvas { opacity: 1; }
-.fn-figure > .fn-motion-image {
-  position: absolute;
-  inset: 0;
-  visibility: hidden;
+.fn-waiting > img { visibility: hidden; }
+.fn-preview-image,
+.fn-figure > img.fn-preview-image {
+  position: absolute; inset: auto; display: block; visibility: visible;
+  width: auto; height: auto; object-fit: fill; pointer-events: none;
+  max-width: none; max-height: none; -webkit-user-drag: none;
 }
-.fn-image-mode > .fn-motion-image { visibility: visible; }
 .fn-image-mode > .fn-motion-canvas { opacity: 0; }
 .fn-figure.fn-card-art > img {
   max-width: 82%;
   max-height: 81%;
   border-radius: 6%;
   object-fit: contain;
-}
-.fn-enter .fn-figure {
-  animation: fn-materialize .76s ease-out both;
-}
-@keyframes fn-materialize {
-  0%,18% { opacity: 0; transform: translateY(3%) scale(.96); filter: brightness(4) sepia(1) saturate(8) hue-rotate(131deg); }
-  42% { opacity: 1; filter: brightness(3) sepia(1) saturate(6) hue-rotate(135deg) drop-shadow(0 0 13px #6ff5ff); }
-  69% { filter: brightness(1.45) saturate(1.12); }
-  100% { transform: none; filter: none; opacity: 1; }
-}
-.fn-flash {
-  position: absolute;
-  left: 32.3%;
-  top: 9.9%;
-  width: 36%;
-  height: 66.2%;
-  pointer-events: none;
-  opacity: 0;
-  background: url("reward--reveal-light.webp") no-repeat 0 0/2500% 100%;
-}
-.fn-enter .fn-flash { animation: fn-light .82s steps(24,end) both; }
-@keyframes fn-light {
-  0% { background-position: 0 0; opacity: 0; }
-  7%,95% { opacity: 1; }
-  100% { background-position: 100% 0; opacity: 0; }
 }
 .fn-enter .fn-info { animation: fn-info-in .48s ease-out both; }
 @keyframes fn-info-in { from { opacity: 0; } to { opacity: 1; } }
@@ -197,45 +180,30 @@ dialog.fn-reward {
 .fn-strip img { width: 100%; height: 100%; display: block; object-fit: cover; }
 .fn-actions {
   position: absolute;
-  left: 3.25%;
-  bottom: 6.05%;
-  height: 5.55%;
-  width: 20.15%;
-  display: grid;
-  grid-template-columns: 39% 54.5%;
-  gap: 6.5%;
+  left: 2.957%; top: 87.366%; height: 7.46%; width: 20.962%;
+  display: grid; grid-template-columns: 41.475% 56.21%; gap: 2.315%;
 }
 .fn-actions button {
-  color: #111a36;
-  background: #aec9ff;
+  color: transparent;
+  background: transparent center/100% 100% no-repeat;
   border-radius: 1.05cqw;
-  text-transform: uppercase;
-  white-space: nowrap;
-  font: 900 clamp(10px, 1.45cqw, 29px)/1.05 "FN Reward","Arial Black",sans-serif;
-  letter-spacing: -.04em;
 }
-.fn-native .fn-actions button { color: transparent; background: transparent; }
+.fn-actions .fn-equip { background-image: url("reward--acquired-equip.webp"); }
+.fn-actions .fn-claim { background-image: url("reward--acquired-claim.webp"); }
 .fn-actions button:disabled { pointer-events: none; opacity: .55; }
 @media (orientation: portrait) {
   .fn-stage { background-size: auto 100%; }
-  .fn-stage .fn-plate { visibility: hidden; }
-  .fn-native .fn-heading { visibility: visible; }
-  .fn-heading { left: 5%; top: 6%; width: 90%; }
+  .fn-heading { left: 4%; top: 5.5%; width: 51%; height: auto; aspect-ratio: 580/128; }
   .fn-stage h2 { font-size: clamp(20px, 4.8cqw, 46px); }
   .fn-stage p { font-size: clamp(13px, 2.6cqw, 25px); }
   .fn-type { font-size: clamp(11px, 2.35cqw, 21px); }
   .fn-figure { left: 11%; top: 15.5%; width: 78%; height: 44%; }
-  .fn-flash { left: 9%; top: 14%; width: 82%; height: 46%; }
   .fn-info { left: 5%; top: 61%; width: 90%; text-align: center; }
   .fn-strip { left: 3%; top: 76%; width: 94%; height: 10%; gap: 1.5cqw; }
-  .fn-actions { width: 62%; left: 19%; bottom: max(4%, env(safe-area-inset-bottom)); height: 5.7%; }
-  .fn-actions button, .fn-native .fn-actions button {
-    color: #111a36;
-    background: #aec9ff;
-    font-size: clamp(13px, 2.9cqw, 27px);
-    border-radius: 2cqw;
-  }
+  .fn-actions { top: auto; left: 3%; bottom: max(4%, env(safe-area-inset-bottom)); width: 57%; height: auto; aspect-ratio: 475/111; }
+  .fn-actions { left: 18%; width: 64%; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .fn-enter .fn-figure, .fn-enter .fn-info, .fn-enter .fn-flash { animation: none; }
+  .fn-opening .fn-heading, .fn-opening .fn-strip, .fn-opening .fn-actions,
+  .fn-enter .fn-info { animation: none; }
 }

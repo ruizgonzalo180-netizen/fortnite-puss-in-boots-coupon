@@ -85,6 +85,13 @@
 }
 .shop-coupon button:focus-visible { outline: .2cqw solid white; outline-offset: .2cqw; }
 .coupon-badge:focus-visible { border-radius: 1cqw; }
+@media (orientation: portrait) {
+  .coupon-badge {
+    width: min(43%, 350px);
+    right: max(2%, env(safe-area-inset-right));
+    bottom: max(7%, calc(58px + env(safe-area-inset-bottom)));
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   .coupon-glint { animation: none; }
   .coupon-glint { opacity: 0; }
