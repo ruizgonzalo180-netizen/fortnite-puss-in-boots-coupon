@@ -172,7 +172,7 @@
     });
     const controls = [
       ['Support a Creator',[1213,1360,480,77],supportCreator],
-      ['About Shop',[1714,1360,249,77],() => note('About Shop','The Puss in Boots Bundle includes six items. Select a card to preview an item, or open the bundle to redeem your coupon.')],
+      ['About Shop',[1714,1360,249,77],() => note('About Shop','Select a card to preview an item. Tap the red Black Friday coupon to claim all six items in the Puss in Boots Bundle.')],
       ['Voice Chat',[1983,1360,77,77],() => note('Voice Chat','No party members connected.')],
       ['Chat',[2080,1360,142,77],() => note('Party Chat','No party members connected.')]
     ];

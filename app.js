@@ -45,23 +45,10 @@
     ShopLobby.hide();
   }
 
-  function couponOptions(badge) {
-    return {
-      active:state.coupon === "active", redeemed:state.coupon === "redeemed", badge,
-      onApply() {
-        state = readState();
-        if (state.coupon === "redeemed") return openLocker();
-        state.coupon = "active";
-        save();
-        openDetail("puss", true);
-      },
-      onView:openLocker
-    };
-  }
-
-  function openCoupon() {
-    ShopCoupon.show(couponOptions(screen === "catalog"));
-    ShopCoupon.openDialog();
+  function redeemCoupon() {
+    if (screen === "catalog" || screen === "detail") {
+      purchase({id:"puss", bundle:true}, true);
+    }
   }
 
   function equip(id, toggle = false) {
@@ -80,9 +67,9 @@
     product = null;
     ShopCatalog.open({
       owned:state.owned, balance:state.balance, discountActive:state.coupon === "active",
-      onItem:openDetail, onBack:openLobby, onCoupon:openCoupon, onLocker:openLocker
+      onItem:openDetail, onBack:openLobby, onCoupon:redeemCoupon, onLocker:openLocker
     });
-    ShopCoupon.show(couponOptions(true));
+    ShopCoupon.show({redeemed:state.coupon === "redeemed", onRedeem:redeemCoupon, onView:openLocker});
   }
 
   function openDetail(id = "puss", bundle = false) {
@@ -91,8 +78,8 @@
     product = {id, bundle};
     ShopDetail.open({
       itemId:id, bundle, owned:state.owned, equipped:state.equipped, balance:state.balance,
-      discountActive:state.coupon === "active", onBuy:buy, onBack:openCatalog,
-      onCoupon:openCoupon, onViewRewards:openLocker,
+      discountActive:state.coupon === "active", onBuy:() => purchase({id, bundle}), onBack:openCatalog,
+      onCoupon:redeemCoupon, onViewRewards:openLocker,
       onEquip(item) {
         const changed = equip(typeof item === "string" ? item : item.id);
         return changed;
@@ -116,18 +103,22 @@
     ShopLobby.returnToLobby();
   }
 
-  function buy() {
-    if (busy || screen !== "detail" || !product) return;
+  function purchase(offer, withCoupon = false) {
+    if (busy) return;
     busy = true;
-    const offer = {...product};
     function complete() {
       state = readState();
       const ids = offer.bundle ? items.map(item => item.id) :
         offer.id === "death" ? ["death", "sickles"] : [offer.id];
       const newIds = ids.filter(id => byId.has(id) && !state.owned.includes(id));
       if (!newIds.length) { busy = false; openLocker(); return; }
-      const cost = offer.bundle ? (state.coupon === "active" ? 0 : 2400) : byId.get(offer.id).price;
-      if (!Number.isFinite(cost) || cost > state.balance) { busy = false; openCoupon(); return; }
+      const discount = withCoupon || (offer.bundle && state.coupon === "active");
+      const cost = discount ? 0 : offer.bundle ? ShopDetail.bundle.price : byId.get(offer.id).price;
+      if (!Number.isFinite(cost) || cost > state.balance) {
+        busy = false;
+        openDetail(offer.id, offer.bundle);
+        return;
+      }
       state.balance -= cost;
       state.owned.push(...newIds);
       if (items.every(item => state.owned.includes(item.id))) state.coupon = "redeemed";

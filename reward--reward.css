@@ -107,6 +107,32 @@ dialog.fn-reward {
   object-fit: contain;
   -webkit-user-drag: none;
 }
+.fn-motion-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0;
+}
+.fn-motion-source {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1px;
+  height: 1px;
+  opacity: .001;
+  pointer-events: none;
+}
+.fn-moving > img { visibility: hidden; }
+.fn-moving .fn-motion-canvas { opacity: 1; }
+.fn-figure > .fn-motion-image {
+  position: absolute;
+  inset: 0;
+  visibility: hidden;
+}
+.fn-image-mode > .fn-motion-image { visibility: visible; }
+.fn-image-mode > .fn-motion-canvas { opacity: 0; }
 .fn-figure.fn-card-art > img {
   max-width: 82%;
   max-height: 81%;
