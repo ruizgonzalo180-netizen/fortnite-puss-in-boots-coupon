@@ -38,14 +38,3 @@ html.ipad-installed #stage {
   position: fixed;
   inset: 0;
 }
-@media (orientation: landscape) {
-  html.ipad-installed body {
-    position: relative;
-    height: var(--installed-height, 100vh);
-    height: var(--installed-height, 100lvh);
-  }
-  html.ipad-installed #stage {
-    position: absolute;
-    inset: 0;
-  }
-}
