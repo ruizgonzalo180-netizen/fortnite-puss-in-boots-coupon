@@ -42,6 +42,28 @@
 .dd-dialog p{margin:0 0 1.6cqw;font:1.31cqw/1.36 Arial,Helvetica,sans-serif;color:#eff5ff}
 .dd-screen .dd-panel-button{padding:.9cqw 1.35cqw;width:100%;margin:.55cqw 0 0;border-radius:.65cqw;color:#14233a;background:#b0c9ee;text-transform:uppercase;font-size:1.20cqw}
 .dd-screen .dd-panel-button:last-child{background:#f5ff12}
+@media (orientation:landscape){
+  html.ipad-protected-top .dd-native-hud{
+    /* Paint the two regions of the native HUD independently, retaining their original scale. */
+    background-size:0 0;
+  }
+  html.ipad-protected-top .dd-native-hud::before,
+  html.ipad-protected-top .dd-native-hud::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background-image:inherit;
+    background-position:center;
+    background-size:100% 100%;
+    background-repeat:no-repeat;
+  }
+  html.ipad-protected-top .dd-native-hud::before{
+    clip-path:inset(0 0 88%);
+    transform:translateY(var(--ipad-hud-clearance,44px));
+  }
+  html.ipad-protected-top .dd-native-hud::after{clip-path:inset(12% 0 0)}
+  html.ipad-protected-top .dd-balance{transform:translateY(var(--ipad-hud-clearance,44px))}
+}
 @media (orientation:portrait){
   .dd-screen{
     --dd-gutter:clamp(14px,4cqw,34px);

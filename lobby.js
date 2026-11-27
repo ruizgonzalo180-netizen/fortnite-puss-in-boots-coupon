@@ -19,9 +19,8 @@
     root.setAttribute('aria-label', 'Fortnite');
     root.hidden = true;
     root.innerHTML = '<div class="scene-world"><img class="scene-art" alt=""><video class="scene-video" playsinline webkit-playsinline preload="auto" disablepictureinpicture disableremoteplayback></video>' +
-      '<div class="lobby-costume"></div></div><div class="portrait-home"><div class="ph-search">⌕ &nbsp;Biblioteca de apps</div><div class="ph-grid"></div></div>' +
+      '<div class="lobby-costume"></div><span class="lobby-vbucks" hidden></span></div><div class="portrait-home"><div class="ph-search">⌕ &nbsp;Biblioteca de apps</div><div class="ph-grid"></div></div>' +
       '<div class="portrait-hud" aria-hidden="true"><i class="ph-play"></i><span class="ph-balance"><i></i><b>800</b></span><i class="ph-avatar"></i></div>' +
-      '<span class="lobby-vbucks" hidden></span>' +
       '<div class="lobby-status" hidden><span class="lobby-clock"></span><img alt="" src="lobby-media--status.webp"></div><div class="lobby-input"></div>';
     const grid = root.querySelector('.ph-grid');
     folders.forEach((name,index) => {
@@ -89,6 +88,7 @@
     art.src = media(poster);
     scene = next;
     root.dataset.scene = next;
+    window.ShopIPadDisplay?.setScene(next);
     delete root.dataset.discover;
     inputs.replaceChildren();
     costume.replaceChildren();
@@ -161,6 +161,7 @@
 
   function discoverButtons() {
     root.dataset.discover = 'true';
+    window.ShopIPadDisplay?.setScene('discover');
     const amount = window.ShopState?.balance;
     root.querySelector('.ph-balance b').textContent = Number.isFinite(amount) ? amount.toLocaleString('en-US') : '800';
     inputs.replaceChildren();
@@ -202,6 +203,7 @@
       lobby();
       scene = 'wheel';
       root.dataset.scene = scene;
+      window.ShopIPadDisplay?.setScene('wheel');
       inputs.replaceChildren();
       const overlay = document.createElement('div');
       overlay.className = 'emote-overlay';

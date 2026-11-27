@@ -79,6 +79,26 @@
 .fn-lobby .scene-world { position: absolute; inset: 0; }
 .fn-lobby .portrait-home, .fn-lobby .portrait-hud { display: none; }
 
+@media (orientation: landscape) {
+  html.ipad-protected-top .fn-lobby:is([data-scene="lobby"],[data-scene="dance"],[data-scene="wheel"],[data-discover="true"]) {
+    --lobby-sky: url("lobby-media--lobby-sky.webp");
+  }
+  html.ipad-protected-top .fn-lobby[data-discover="true"] { --lobby-sky: url("lobby-media--discover-sky.webp"); }
+  html.ipad-protected-top .fn-lobby[data-scene="wheel"] { --lobby-sky: url("lobby-media--wheel-sky.webp"); }
+  html.ipad-protected-top .fn-lobby:is([data-scene="lobby"],[data-scene="dance"],[data-scene="wheel"],[data-discover="true"])::before {
+    content: ""; pointer-events: none; position: absolute; inset: 0 0 auto;
+    height: var(--ipad-hud-clearance,0px);
+    background-image: var(--lobby-sky);
+    background-size: 100% 100%; background-repeat: no-repeat;
+  }
+  html.ipad-protected-top .fn-lobby:is([data-scene="lobby"],[data-scene="dance"],[data-scene="wheel"],[data-discover="true"]) :is(.scene-world,.lobby-input) {
+    top: var(--ipad-hud-clearance,0px); bottom: 0; height: auto;
+  }
+  html.ipad-protected-top .fn-lobby .lobby-vbucks {
+    top: calc(2.25% + .9775 * var(--ipad-hud-clearance, 0px));
+  }
+}
+
 @media (orientation: portrait) {
   .fn-lobby {
     --pad: max(3cqw, env(safe-area-inset-left));
