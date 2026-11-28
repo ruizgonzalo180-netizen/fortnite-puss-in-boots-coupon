@@ -51,10 +51,6 @@
     return opts.bundle ? bundle.price : byId.get(selectedOffer).price;
   }
 
-  function discounted() {
-    return Boolean(opts.discountActive);
-  }
-
   function closePanel() {
     if (overlay) overlay.remove();
     overlay = null;
@@ -272,10 +268,6 @@
       }
       return;
     }
-    if (!discounted() && fullPrice() > (opts.balance ?? 800)) {
-      opts.onCoupon?.();
-      return;
-    }
     buying = true;
     const originalScreen = screen;
     try { opts.onBuy?.([...contents()]); }
@@ -284,31 +276,22 @@
 
   function addOffer() {
     const gotAll = contents().every(owned);
-    const discount = discounted();
     const balance = opts.balance ?? 800;
-    const price = discount ? 0 : fullPrice();
     const equipped = gotAll && !opts.bundle && Object.values(opts.equipped || {}).includes(current.id);
-    const label = gotAll ? (opts.bundle ? 'VIEW ITEMS' : equipped ? 'EQUIPPED' : 'EQUIP') : discount ? 'REDEEM' : price > balance ? 'USE COUPON' : 'PURCHASE';
+    const label = gotAll ? (opts.bundle ? 'VIEW ITEMS' : equipped ? 'EQUIPPED' : 'EQUIP') : 'USE COUPON';
     const numericBalance = el('span','dd-balance',String(balance));
     if (balance === 800) numericBalance.classList.add('dd-balance-native');
-    if (opts.bundle && !gotAll && !discount && price === bundle.price) {
-      const original = el('img','dd-original-price');
-      original.src = path('detail-media--bundle-price.webp');
-      original.alt = 'The price for included items is: 2,400 V-Bucks (originally 4,700).';
-      screen.append(original);
-    }
     {
       const priceRow = el('div','dd-prices');
-      if (opts.bundle && !gotAll && !discount && price === bundle.price) priceRow.classList.add('dd-portrait-prices');
-      const caption = gotAll ? (opts.bundle ? 'Bundle in your locker' : 'In your locker') : discount ? 'Black Friday Coupon applied' : (available.length > 1 ? 'The price for included items is:' : 'Item price');
+      const caption = gotAll ? (opts.bundle ? 'Bundle in your locker' : 'In your locker') : 'Price with Black Friday Coupon';
       priceRow.append(el('div','dd-price-caption',caption));
       const amount = el('div',gotAll ? 'dd-price owned' : 'dd-price');
       if (gotAll) amount.textContent = 'OWNED';
       else {
         const coin = el('span','dd-coin','V');
         coin.setAttribute('aria-label','V-Bucks');
-        amount.append(coin, document.createTextNode(price.toLocaleString('en-US')));
-        if (discount) amount.append(el('s','dd-was',fullPrice().toLocaleString('en-US')));
+        amount.append(coin, document.createTextNode('0'));
+        amount.append(el('s','dd-was',fullPrice().toLocaleString('en-US')));
       }
       priceRow.append(amount);
       screen.append(priceRow);
@@ -361,13 +344,6 @@
     }
   }
 
-  function setDiscount(active = true) {
-    if (!screen) return;
-    opts.discountActive = active;
-    screen.querySelectorAll(".dd-prices,.dd-original-price,.dd-primary,.dd-balance").forEach(el => el.remove());
-    addOffer();
-  }
-
   function open(options = {}) {
     close();
     const stage = document.getElementById('stage');
@@ -384,5 +360,5 @@
     document.addEventListener('keydown',onKey);
   }
 
-  window.ShopDetail = {items,bundle,open,close,setDiscount};
+  window.ShopDetail = {items,bundle,open,close};
 })();

@@ -18,13 +18,6 @@
     ShopLobby.hide();
   }
 
-  function redeemCoupon() {
-    if (busy || state.coupon !== "available") return;
-    state.coupon = "active";
-    if (screen === "detail") ShopDetail.setDiscount(true);
-    else openCatalog();
-  }
-
   function equip(id, toggle = false) {
     if (!state.owned.includes(id)) return state.equipped;
     const slot = slots[id];
@@ -37,15 +30,11 @@
     clearScreens();
     screen = "catalog";
     ShopCatalog.open({
-      owned:state.owned, balance:state.balance, discountActive:state.coupon === "active",
-      onItem(id, bundle) {
-        if (state.coupon === "active" && (bundle || !state.owned.includes(id))) purchase({id, bundle});
-        else openDetail(id, bundle);
-      },
-      onBack:openLobby, onCoupon:redeemCoupon, onLocker:openLocker
+      owned:state.owned, balance:state.balance, onItem:openDetail,
+      onBack:openLobby, onLocker:openLocker
     });
     ShopCoupon.show({
-      status:state.coupon, onRedeem:redeemCoupon, onBundle:() => openDetail("puss", true), onView:openLocker
+      status:state.coupon, onBundle:() => openDetail("puss", true), onView:openLocker
     });
   }
 
@@ -54,8 +43,8 @@
     screen = "detail";
     ShopDetail.open({
       itemId:id, bundle, owned:state.owned, equipped:state.equipped, balance:state.balance,
-      discountActive:state.coupon === "active", onBuy:() => purchase({id, bundle}), onBack:openCatalog,
-      onCoupon:redeemCoupon, onViewRewards:openLocker,
+      onBuy:() => purchase({id, bundle}), onBack:openCatalog,
+      onViewRewards:openLocker,
       onEquip(item) {
         const changed = equip(typeof item === "string" ? item : item.id);
         return changed;
@@ -86,14 +75,6 @@
       offer.id === "death" ? ["death", "sickles"] : [offer.id];
     const newIds = ids.filter(id => byId.has(id) && !state.owned.includes(id));
     if (!newIds.length) { busy = false; openLocker(); return; }
-    const discount = state.coupon === "active";
-    const cost = discount ? 0 : offer.bundle ? ShopDetail.bundle.price : byId.get(offer.id).price;
-    if (!Number.isFinite(cost) || cost > state.balance) {
-      busy = false;
-      openDetail(offer.id, offer.bundle);
-      return;
-    }
-    state.balance -= cost;
     state.owned.push(...newIds);
     if (items.every(item => state.owned.includes(item.id))) state.coupon = "redeemed";
     screen = "reward";

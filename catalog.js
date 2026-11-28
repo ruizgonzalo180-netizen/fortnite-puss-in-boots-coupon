@@ -178,7 +178,7 @@
     },'pc-hit pc-rail-hit');
     const controls = [
       ['Support a Creator',[1213,1360,480,77],supportCreator],
-      ['About Shop',[1714,1360,249,77],() => note('About Shop','Select a card to preview an item. Tap the red Black Friday coupon to claim all six items in the Puss in Boots Bundle.')],
+      ['About Shop',[1714,1360,249,77],() => note('About Shop','Select a card to preview an item. Choose Use Coupon to claim the selected offer for 0 V-Bucks.')],
       ['Voice Chat',[1983,1360,77,77],() => note('Voice Chat','No party members connected.')],
       ['Chat',[2080,1360,142,77],() => note('Party Chat','No party members connected.')]
     ];
@@ -207,7 +207,7 @@
     for (const c of cards) {
       const isBundle = c.id === 'bundle';
       const owned = isBundle ? cards.slice(1).every(x => getOwned(x.id)) : getOwned(c.id);
-      const b = button(c.name+(owned ? ', owned' : options.discountActive ? ', 0 V-Bucks' : ''),() => select(c),'pc-card');
+      const b = button(c.name+(owned ? ', owned' : ', 0 V-Bucks'),() => select(c),'pc-card');
       b.dataset.item = c.id;
       const [x,y,w,h] = c.rect;
       position(b,[x-shelfLeft,y-shelfTop,w,h]);
@@ -219,7 +219,7 @@
       if(isBundle) bundleImage = img;
       if (owned) {
         b.append(node('span','pc-price owned','OWNED'));
-      } else if (options.discountActive) {
+      } else {
         const price = node('span', 'pc-price coupon');
         const original = isBundle ? ShopDetail.bundle.price : ShopDetail.items.find(item => item.id === c.id).price;
         price.append(node('span', 'pc-coin', 'V'), ' 0 ', node('s', '', original.toLocaleString('en-US')));
