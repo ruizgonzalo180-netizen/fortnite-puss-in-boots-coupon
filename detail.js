@@ -52,7 +52,7 @@
   }
 
   function discounted() {
-    return Boolean(opts.bundle && opts.discountActive);
+    return Boolean(opts.discountActive);
   }
 
   function closePanel() {
@@ -273,7 +273,7 @@
       return;
     }
     if (!discounted() && fullPrice() > (opts.balance ?? 800)) {
-      opts.onCoupon?.(setDiscount);
+      opts.onCoupon?.();
       return;
     }
     buying = true;
@@ -364,9 +364,8 @@
   function setDiscount(active = true) {
     if (!screen) return;
     opts.discountActive = active;
-    const itemId = current.id;
-    if (active) { opts.bundle = true; available = bundle.itemIds; }
-    select(itemId);
+    screen.querySelectorAll(".dd-prices,.dd-original-price,.dd-primary,.dd-balance").forEach(el => el.remove());
+    addOffer();
   }
 
   function open(options = {}) {

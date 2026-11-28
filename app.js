@@ -19,9 +19,10 @@
   }
 
   function redeemCoupon() {
-    if (screen === "catalog" || screen === "detail") {
-      purchase({id:"puss", bundle:true}, true);
-    }
+    if (busy || state.coupon !== "available") return;
+    state.coupon = "active";
+    if (screen === "detail") ShopDetail.setDiscount(true);
+    else openCatalog();
   }
 
   function equip(id, toggle = false) {
@@ -37,9 +38,15 @@
     screen = "catalog";
     ShopCatalog.open({
       owned:state.owned, balance:state.balance, discountActive:state.coupon === "active",
-      onItem:openDetail, onBack:openLobby, onCoupon:redeemCoupon, onLocker:openLocker
+      onItem(id, bundle) {
+        if (state.coupon === "active" && (bundle || !state.owned.includes(id))) purchase({id, bundle});
+        else openDetail(id, bundle);
+      },
+      onBack:openLobby, onCoupon:redeemCoupon, onLocker:openLocker
     });
-    ShopCoupon.show({redeemed:state.coupon === "redeemed", onRedeem:redeemCoupon, onView:openLocker});
+    ShopCoupon.show({
+      status:state.coupon, onRedeem:redeemCoupon, onBundle:() => openDetail("puss", true), onView:openLocker
+    });
   }
 
   function openDetail(id = "puss", bundle = false) {
@@ -72,14 +79,14 @@
     ShopLobby.returnToLobby();
   }
 
-  function purchase(offer, withCoupon = false) {
+  function purchase(offer) {
     if (busy) return;
     busy = true;
     const ids = offer.bundle ? items.map(item => item.id) :
       offer.id === "death" ? ["death", "sickles"] : [offer.id];
     const newIds = ids.filter(id => byId.has(id) && !state.owned.includes(id));
     if (!newIds.length) { busy = false; openLocker(); return; }
-    const discount = withCoupon || (offer.bundle && state.coupon === "active");
+    const discount = state.coupon === "active";
     const cost = discount ? 0 : offer.bundle ? ShopDetail.bundle.price : byId.get(offer.id).price;
     if (!Number.isFinite(cost) || cost > state.balance) {
       busy = false;

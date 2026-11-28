@@ -207,7 +207,7 @@
     for (const c of cards) {
       const isBundle = c.id === 'bundle';
       const owned = isBundle ? cards.slice(1).every(x => getOwned(x.id)) : getOwned(c.id);
-      const b = button(c.name+(owned ? ', owned' : ''),() => select(c),'pc-card');
+      const b = button(c.name+(owned ? ', owned' : options.discountActive ? ', 0 V-Bucks' : ''),() => select(c),'pc-card');
       b.dataset.item = c.id;
       const [x,y,w,h] = c.rect;
       position(b,[x-shelfLeft,y-shelfTop,w,h]);
@@ -217,8 +217,14 @@
       img.src = media(c.id);
       b.append(img);
       if(isBundle) bundleImage = img;
-      const applicable = isBundle && options.discountActive;
-      if(owned || applicable) b.append(node('span','pc-price'+(owned?' owned':' coupon'),owned?'OWNED':'0  •  COUPON APPLIED'));
+      if (owned) {
+        b.append(node('span','pc-price owned','OWNED'));
+      } else if (options.discountActive) {
+        const price = node('span', 'pc-price coupon');
+        const original = isBundle ? ShopDetail.bundle.price : ShopDetail.items.find(item => item.id === c.id).price;
+        price.append(node('span', 'pc-coin', 'V'), ' 0 ', node('s', '', original.toLocaleString('en-US')));
+        b.append(price);
+      }
       rows.append(b);
     }
     shelf.append(rows);

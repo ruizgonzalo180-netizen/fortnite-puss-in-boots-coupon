@@ -230,3 +230,29 @@
   #puss-catalog .pc-card .pc-price {font-size:2.55cqw; min-width:12.5cqw}
   #puss-catalog .pc-panel {width:min(92cqw,470px);}
 }
+
+#puss-catalog .pc-card .pc-price.coupon {
+  left: 0.6%; bottom: 0.5%; min-width: 0; width: max-content;
+  padding: .12em .5em .1em .18em;
+  background: #a45e34; color: white;
+  font-size: clamp(12px,1.12cqw,26px); line-height: 1.12;
+}
+#puss-catalog .pc-card .pc-price.coupon s {
+  opacity: .78; font-size: .85em; padding-left: .15em;
+}
+#puss-catalog .pc-price .pc-coin {
+  display: inline-grid; place-items: center; vertical-align: .07em;
+  width: 1em; height: 1em; border-radius: 50%;
+  background: white; color: #93512d; font: 900 .84em/1 Arial,sans-serif;
+}
+@media (orientation:portrait) {
+  #puss-catalog .pc-card .pc-price.coupon { font-size:clamp(12px,2cqw,20px); }
+}
+#puss-catalog .pc-card .pc-price:is(.coupon,.owned) {
+  display: flex; align-items: center; gap: .23em;
+  left: .6%; bottom: 1%; height: 10.4%; min-width: 43%;
+  padding: 0 .2em; text-align: left;
+  background: linear-gradient(90deg,#a45e34 80%,#a45e3400);
+}
+#puss-catalog .pc-card[data-item="bundle"] .pc-price:is(.coupon,.owned) {min-width: 25%}
+#puss-catalog .pc-card:is([data-item="puss"],[data-item="death"]) .pc-price:is(.coupon,.owned) {min-width: 29%}

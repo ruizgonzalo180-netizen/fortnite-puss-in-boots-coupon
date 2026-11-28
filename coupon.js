@@ -25,20 +25,22 @@
     layer = null;
   }
 
-  function show({redeemed, onRedeem, onView}) {
+  function show({status, onRedeem, onBundle, onView}) {
     hide();
+    const redeemed = status === "redeemed";
+    const active = status === "active";
     const badge = document.createElement("button");
     badge.type = "button";
     badge.className = "coupon-badge";
-    badge.setAttribute("aria-label", redeemed ? "View your Puss in Boots bundle items" : "Redeem Black Friday coupon for Puss in Boots");
-    badge.addEventListener("click", redeemed ? onView : onRedeem);
+    badge.setAttribute("aria-label", redeemed ? "View your Puss in Boots bundle items" : active ? "View discounted Puss in Boots bundle" : "Redeem Black Friday coupon for Puss in Boots");
+    badge.addEventListener("click", redeemed ? onView : active ? onBundle : onRedeem);
     badge.append(
       image("gold-ribbon.png", "coupon-ribbon"),
       image("coupon-ticket.png", "coupon-ticket"),
       label("span", "coupon-glint"),
       label("span", "coupon-glint coupon-glint-small"),
-      label("strong", "coupon-badge-title", redeemed ? "Bundle Redeemed" : "Black Friday Coupon"),
-      label("span", "coupon-badge-caption", redeemed ? "View your items" : "Puss in Boots")
+      label("strong", "coupon-badge-title", redeemed ? "Bundle Redeemed" : active ? "Coupon Applied" : "Black Friday Coupon"),
+      label("span", "coupon-badge-caption", redeemed ? "View your items" : active ? "0 V-Bucks" : "Puss in Boots")
     );
     layer = document.createElement("div");
     layer.className = "shop-coupon";
